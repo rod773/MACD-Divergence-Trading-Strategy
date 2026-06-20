@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp,
@@ -510,6 +510,8 @@ export default function Home() {
   const [selectedType, setSelectedType] = useState<string>("ALL");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [animatedPrices, setAnimatedPrices] = useState<Record<string, number>>({});
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const initial: Record<string, number> = {};
@@ -1163,16 +1165,68 @@ export default function Home() {
 
               {/* Video */}
               <div className="mb-4">
-                <div className="bg-[#0E1223] border border-white/5 rounded-lg overflow-hidden">
-                  <video
-                    controls
-                    className="w-full aspect-video"
-                    poster=""
+                {!videoPlaying ? (
+                  <div
+                    className="relative group cursor-pointer bg-[#0E1223] border border-white/5 rounded-lg overflow-hidden"
+                    onClick={() => {
+                      setVideoPlaying(true);
+                      setTimeout(() => videoRef.current?.play(), 0);
+                    }}
                   >
-                    <source src="/macd-divergence.mp4" type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                </div>
+                    <div className="relative aspect-video bg-gradient-to-br from-[#0a0e1a] via-[#0E1223] to-[#0a0e1a] flex items-center justify-center">
+                      {/* Background pattern */}
+                      <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <line x1="0" y1="20" x2="20" y2="60" stroke="#10b981" strokeWidth="0.3"/>
+                        <line x1="20" y1="60" x2="35" y2="30" stroke="#10b981" strokeWidth="0.3"/>
+                        <line x1="35" y1="30" x2="50" y2="70" stroke="#10b981" strokeWidth="0.3"/>
+                        <line x1="50" y1="70" x2="65" y2="25" stroke="#10b981" strokeWidth="0.3"/>
+                        <line x1="65" y1="25" x2="80" y2="55" stroke="#10b981" strokeWidth="0.3"/>
+                        <line x1="80" y1="55" x2="100" y2="15" stroke="#10b981" strokeWidth="0.3"/>
+                        <line x1="0" y1="50" x2="100" y2="50" stroke="#1e293b" strokeWidth="0.2" strokeDasharray="2"/>
+                        <line x1="0" y1="80" x2="20" y2="40" stroke="#3b82f6" strokeWidth="0.3"/>
+                        <line x1="20" y1="40" x2="35" y2="65" stroke="#3b82f6" strokeWidth="0.3"/>
+                        <line x1="35" y1="65" x2="50" y2="35" stroke="#3b82f6" strokeWidth="0.3"/>
+                        <line x1="50" y1="35" x2="65" y2="70" stroke="#3b82f6" strokeWidth="0.3"/>
+                        <line x1="65" y1="70" x2="80" y2="45" stroke="#3b82f6" strokeWidth="0.3"/>
+                        <line x1="80" y1="45" x2="100" y2="80" stroke="#3b82f6" strokeWidth="0.3"/>
+                      </svg>
+
+                      {/* Title text */}
+                      <div className="absolute top-6 left-6 right-6 text-left z-10">
+                        <p className="text-xs uppercase tracking-wider text-emerald-400 mb-1">Video Tutorial</p>
+                        <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">MACD Divergence Masterclass</h3>
+                        <p className="text-xs sm:text-sm text-slate-400">Learn all 4 divergence types in 2 minutes</p>
+                      </div>
+
+                      {/* Play button */}
+                      <div className="relative z-10">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 group-hover:scale-110 transition-all duration-300">
+                          <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Duration badge */}
+                      <div className="absolute bottom-4 right-4 bg-black/70 px-2 py-1 rounded text-xs text-white z-10">
+                        1:53
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-[#0E1223] border border-white/5 rounded-lg overflow-hidden">
+                    <video
+                      ref={videoRef}
+                      controls
+                      autoPlay
+                      className="w-full aspect-video"
+                      onEnded={() => setVideoPlaying(false)}
+                    >
+                      <source src="/macd-divergence.mp4" type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                )}
               </div>
 
               {/* Key Difference */}
