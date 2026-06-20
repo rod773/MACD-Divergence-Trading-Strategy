@@ -31,6 +31,24 @@ import {
 } from "lucide-react";
 import AiChat from "@/components/ai-chat";
 
+interface DetectedDivergence {
+  id: string;
+  pair: string;
+  direction: "BUY" | "SELL";
+  divergenceType: "Regular Bullish" | "Regular Bearish" | "Hidden Bullish" | "Hidden Bearish";
+  timeframe: string;
+  detectedAt: string;
+  confidence: "HIGH" | "MEDIUM" | "LOW";
+}
+
+interface MarketData {
+  pair: string;
+  currentPrice: number;
+  divergences: DetectedDivergence[];
+  lastUpdated: string;
+  error?: string;
+}
+
 interface DivergenceSetup {
   id: string;
   pair: string;
@@ -55,6 +73,8 @@ interface DivergenceSetup {
   macdBehavior: string;
   confirmation: string;
 }
+
+const PAIRS = ["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD"] as const;
 
 const divergenceSetups: DivergenceSetup[] = [
   {
@@ -512,71 +532,98 @@ export default function Home() {
   const [animatedPrices, setAnimatedPrices] = useState<Record<string, number>>({});
   const [videoPlaying, setVideoPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [alerts, setAlerts] = useState<{ id: string; pair: string; type: string; direction: string; entry: number; time: string; dismissed: boolean }[]>([]);
-  const [popupAlert, setPopupAlert] = useState<{ pair: string; type: string; direction: string; entry: number } | null>(null);
+  const [alerts, setAlerts] = useState<{ id: string; pair: string; type: string; direction: string; time: string; dismissed: boolean }[]>([]);
+  const [popupAlert, setPopupAlert] = useState<{ pair: string; type: string; direction: string } | null>(null);
+  const [liveData, setLiveData] = useState<Record<string, MarketData>>({});
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [lastFetchTime, setLastFetchTime] = useState<string>("");
+  const knownDivergenceIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    const initial: Record<string, number> = {};
-    divergenceSetups.forEach((t) => {
-      initial[t.id] = t.currentPrice;
-    });
-    setAnimatedPrices(initial);
+    const fetchLiveData = async () => {
+      try {
+        setIsLoadingData(true);
+        const res = await fetch("/api/market");
+        if (!res.ok) throw new Error("Failed to fetch market data");
+        const data: Record<string, MarketData> = await res.json();
+        setLiveData(data);
+        setLastFetchTime(new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }));
 
-    const interval = setInterval(() => {
-      setAnimatedPrices((prev) => {
-        const next = { ...prev };
-        divergenceSetups.forEach((t) => {
-          const volatility = t.pair.includes("XAU") ? 2 : t.pair.includes("BTC") ? 50 : t.pair.includes("ETH") ? 2 : 0.0003;
-          const change = (Math.random() - 0.5) * volatility;
-          next[t.id] = Math.max(0, prev[t.id] + change);
-        });
-        return next;
-      });
-    }, 2000);
+        // Check for new divergences and trigger alerts
+        for (const pair of PAIRS) {
+          const pairData = data[pair];
+          if (!pairData || pairData.error) continue;
 
+          for (const div of pairData.divergences) {
+            if (!knownDivergenceIds.current.has(div.id)) {
+              knownDivergenceIds.current.add(div.id);
+              const now = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+              const newAlert = {
+                id: div.id,
+                pair: div.pair,
+                type: div.divergenceType,
+                direction: div.direction,
+                time: now,
+                dismissed: false,
+              };
+              setAlerts((prev) => [newAlert, ...prev].slice(0, 20));
+              setPopupAlert({ pair: div.pair, type: div.divergenceType, direction: div.direction });
+              setTimeout(() => setPopupAlert(null), 8000);
+              break; // Only show one popup alert per fetch cycle
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Market data fetch error:", err);
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchLiveData();
+    const interval = setInterval(fetchLiveData, 60000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    const triggerAlert = () => {
-      const pairs = ["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD"];
-      const types = ["Regular Bullish", "Regular Bearish", "Hidden Bullish", "Hidden Bearish"];
-      const pair = pairs[Math.floor(Math.random() * pairs.length)];
-      const type = types[Math.floor(Math.random() * types.length)];
-      const setup = divergenceSetups.find((s) => s.pair === pair && s.divergenceType === type);
-      if (!setup) return;
-
-      const now = new Date();
-      const time = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-      const newAlert = {
-        id: `alert-${Date.now()}`,
-        pair,
-        type,
-        direction: setup.direction,
-        entry: setup.entry,
-        time,
-        dismissed: false,
-      };
-
-      setAlerts((prev) => [newAlert, ...prev].slice(0, 20));
-      setPopupAlert({ pair, type, direction: setup.direction, entry: setup.entry });
-
-      setTimeout(() => setPopupAlert(null), 5000);
+    const getInitialPrice = (pair: string): number => {
+      const livePrice = liveData[pair]?.currentPrice;
+      const hardcodedSetup = divergenceSetups.find((s) => s.pair === pair);
+      return livePrice || hardcodedSetup?.currentPrice || 0;
     };
 
-    const initialDelay = setTimeout(triggerAlert, 3000);
-    const interval = setInterval(triggerAlert, 15000);
-    return () => {
-      clearTimeout(initialDelay);
-      clearInterval(interval);
-    };
-  }, []);
+    const interval = setInterval(() => {
+      setAnimatedPrices((prev) => {
+        const next = { ...prev };
+        PAIRS.forEach((pair) => {
+          const livePrice = liveData[pair]?.currentPrice;
+          if (livePrice && livePrice > 0) {
+            next[pair] = livePrice;
+          } else if (!prev[pair]) {
+            next[pair] = getInitialPrice(pair);
+          } else {
+            const volatility = pair.includes("XAU") ? 2 : pair.includes("BTC") ? 50 : pair.includes("ETH") ? 2 : 0.0003;
+            const change = (Math.random() - 0.5) * volatility;
+            next[pair] = Math.max(0, (prev[pair] || 0) + change);
+          }
+        });
+        return next;
+      });
+    }, 3000);
 
-  const filteredSetups = divergenceSetups.filter((s) => {
-    if (s.pair !== selectedPair) return false;
-    if (selectedType !== "ALL" && s.divergenceType !== selectedType) return false;
-    return true;
-  });
+    return () => clearInterval(interval);
+  }, [liveData]);
+
+  const filteredSetups = divergenceSetups
+    .filter((s) => {
+      if (s.pair !== selectedPair) return false;
+      if (selectedType !== "ALL" && s.divergenceType !== selectedType) return false;
+      return true;
+    })
+    .map((setup) => {
+      const livePrice = liveData[setup.pair]?.currentPrice;
+      return livePrice ? { ...setup, currentPrice: livePrice } : setup;
+    });
 
   const getDirectionColor = (dir: "BUY" | "SELL") =>
     dir === "BUY"
@@ -739,7 +786,12 @@ export default function Home() {
                   { label: "Hidden Bullish", type: "Hidden Bullish", color: "text-cyan-400", sub: "Continuation BUY" },
                   { label: "Hidden Bearish", type: "Hidden Bearish", color: "text-orange-400", sub: "Continuation SELL" },
                 ].map((kpi, i) => {
-                  const count = filteredSetups.filter((s) => s.divergenceType === kpi.type).length;
+                  // Count from live data if available, otherwise from filtered setups
+                  const liveCount = Object.values(liveData).reduce((acc, pair) => {
+                    return acc + (pair.divergences?.filter((d) => d.divergenceType === kpi.type).length || 0);
+                  }, 0);
+                  const setupCount = filteredSetups.filter((s) => s.divergenceType === kpi.type).length;
+                  const count = liveCount > 0 ? liveCount : setupCount;
                   const avgProb = filteredSetups.filter((s) => s.divergenceType === kpi.type);
                   const avg = avgProb.length > 0 ? Math.round(avgProb.reduce((a, s) => a + s.probability, 0) / avgProb.length) : 0;
                   return (
@@ -792,7 +844,7 @@ export default function Home() {
                             </span>
                           </div>
                           <p className="text-xs text-slate-400">
-                            {popupAlert.pair} • {popupAlert.type} • Entry: {popupAlert.entry}
+                            {popupAlert.pair} • {popupAlert.type}
                           </p>
                         </div>
                         <button
@@ -826,7 +878,6 @@ export default function Home() {
                             <th className="text-left px-3 py-2 font-medium">Pair</th>
                             <th className="text-left px-3 py-2 font-medium">Type</th>
                             <th className="text-left px-3 py-2 font-medium">Signal</th>
-                            <th className="text-left px-3 py-2 font-medium">Entry</th>
                             <th className="text-right px-3 py-2 font-medium"></th>
                           </tr>
                         </thead>
@@ -852,7 +903,6 @@ export default function Home() {
                                   {alert.direction}
                                 </span>
                               </td>
-                              <td className="px-3 py-2 text-xs font-mono text-slate-300">{alert.entry}</td>
                               <td className="px-3 py-2 text-right">
                                 <button
                                   onClick={() => setAlerts((prev) => prev.filter((a) => a.id !== alert.id))}
@@ -901,12 +951,15 @@ export default function Home() {
                             <p className="text-xs text-slate-500">Australian Dollar / US Dollar</p>
                           </div>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30">
-                          Strong Sell
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {isLoadingData && <RefreshCw className="w-3 h-3 text-slate-500 animate-spin" />}
+                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                            Strong Sell
+                          </span>
+                        </div>
                       </div>
                       <div className="flex items-baseline gap-3 mb-3">
-                        <span className="text-2xl font-bold tabular-nums">0.7013</span>
+                        <span className="text-2xl font-bold tabular-nums">{liveData["AUD/USD"]?.currentPrice?.toFixed(4) || animatedPrices["AUD/USD"]?.toFixed(4) || "0.7013"}</span>
                         <span className="text-xs text-rose-400 flex items-center gap-1">
                           <ArrowDownRight className="w-3 h-3" /> -0.03%
                         </span>
@@ -928,22 +981,25 @@ export default function Home() {
                     </>
                   ) : selectedPair === "XAU/USD" ? (
                     <>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center border border-white/5">
-                            <span className="text-lg">🥇</span>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center border border-white/5">
+                              <span className="text-lg">🥇</span>
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-sm">XAU/USD</h3>
+                              <p className="text-xs text-slate-500">Gold</p>
+                            </div>
                           </div>
-                          <div>
-                            <h3 className="font-semibold text-sm">XAU/USD</h3>
-                            <p className="text-xs text-slate-500">Gold</p>
+                          <div className="flex items-center gap-2">
+                            {isLoadingData && <RefreshCw className="w-3 h-3 text-slate-500 animate-spin" />}
+                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                              Strong Sell
+                            </span>
                           </div>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30">
-                          Strong Sell
-                        </span>
-                      </div>
-                      <div className="flex items-baseline gap-3 mb-3">
-                        <span className="text-2xl font-bold tabular-nums">$4,172.90</span>
+                        <div className="flex items-baseline gap-3 mb-3">
+                          <span className="text-2xl font-bold tabular-nums">${liveData["XAU/USD"]?.currentPrice?.toLocaleString() || animatedPrices["XAU/USD"]?.toLocaleString() || "4,172.90"}</span>
                         <span className="text-xs text-rose-400 flex items-center gap-1">
                           <ArrowDownRight className="w-3 h-3" /> -1.72%
                         </span>
@@ -965,22 +1021,25 @@ export default function Home() {
                     </>
                   ) : selectedPair === "ETH/USD" ? (
                     <>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400/20 to-purple-500/20 flex items-center justify-center border border-white/5">
-                            <span className="text-lg">⟠</span>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400/20 to-purple-500/20 flex items-center justify-center border border-white/5">
+                              <span className="text-lg">⟠</span>
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-sm">ETH/USD</h3>
+                              <p className="text-xs text-slate-500">Ethereum</p>
+                            </div>
                           </div>
-                          <div>
-                            <h3 className="font-semibold text-sm">ETH/USD</h3>
-                            <p className="text-xs text-slate-500">Ethereum</p>
+                          <div className="flex items-center gap-2">
+                            {isLoadingData && <RefreshCw className="w-3 h-3 text-slate-500 animate-spin" />}
+                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                              Sell
+                            </span>
                           </div>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30">
-                          Sell
-                        </span>
-                      </div>
-                      <div className="flex items-baseline gap-3 mb-3">
-                        <span className="text-2xl font-bold tabular-nums">$3,512.00</span>
+                        <div className="flex items-baseline gap-3 mb-3">
+                          <span className="text-2xl font-bold tabular-nums">${liveData["ETH/USD"]?.currentPrice?.toLocaleString() || animatedPrices["ETH/USD"]?.toLocaleString() || "3,512.00"}</span>
                         <span className="text-xs text-rose-400 flex items-center gap-1">
                           <ArrowDownRight className="w-3 h-3" /> -2.14%
                         </span>
@@ -1002,22 +1061,25 @@ export default function Home() {
                     </>
                   ) : (
                     <>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400/20 to-amber-500/20 flex items-center justify-center border border-white/5">
-                            <span className="text-lg">₿</span>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400/20 to-amber-500/20 flex items-center justify-center border border-white/5">
+                              <span className="text-lg">₿</span>
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-sm">BTC/USD</h3>
+                              <p className="text-xs text-slate-500">Bitcoin</p>
+                            </div>
                           </div>
-                          <div>
-                            <h3 className="font-semibold text-sm">BTC/USD</h3>
-                            <p className="text-xs text-slate-500">Bitcoin</p>
+                          <div className="flex items-center gap-2">
+                            {isLoadingData && <RefreshCw className="w-3 h-3 text-slate-500 animate-spin" />}
+                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                              Buy
+                            </span>
                           </div>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                          Buy
-                        </span>
-                      </div>
-                      <div className="flex items-baseline gap-3 mb-3">
-                        <span className="text-2xl font-bold tabular-nums">$104,850</span>
+                        <div className="flex items-baseline gap-3 mb-3">
+                          <span className="text-2xl font-bold tabular-nums">${liveData["BTC/USD"]?.currentPrice?.toLocaleString() || animatedPrices["BTC/USD"]?.toLocaleString() || "104,850"}</span>
                         <span className="text-xs text-emerald-400 flex items-center gap-1">
                           <ArrowUpRight className="w-3 h-3" /> +1.32%
                         </span>
@@ -1687,7 +1749,7 @@ export default function Home() {
       <footer className="border-t border-white/5 mt-8 py-4 hidden md:block">
         <div className="max-w-[1440px] mx-auto px-4 lg:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-xs text-slate-600">MACD Divergence Trading Strategy • Educational Only</p>
-          <p className="text-xs text-slate-600">Data: Investing.com • Updated June 20, 2026</p>
+          <p className="text-xs text-slate-600">Data: Yahoo Finance{lastFetchTime ? ` • Last scan: ${lastFetchTime}` : ""}</p>
         </div>
       </footer>
 
