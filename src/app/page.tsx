@@ -512,6 +512,8 @@ export default function Home() {
   const [animatedPrices, setAnimatedPrices] = useState<Record<string, number>>({});
   const [videoPlaying, setVideoPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [alerts, setAlerts] = useState<{ id: string; pair: string; type: string; direction: string; entry: number; time: string; dismissed: boolean }[]>([]);
+  const [popupAlert, setPopupAlert] = useState<{ pair: string; type: string; direction: string; entry: number } | null>(null);
 
   useEffect(() => {
     const initial: Record<string, number> = {};
@@ -533,6 +535,41 @@ export default function Home() {
     }, 2000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const triggerAlert = () => {
+      const pairs = ["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD"];
+      const types = ["Regular Bullish", "Regular Bearish", "Hidden Bullish", "Hidden Bearish"];
+      const pair = pairs[Math.floor(Math.random() * pairs.length)];
+      const type = types[Math.floor(Math.random() * types.length)];
+      const setup = divergenceSetups.find((s) => s.pair === pair && s.divergenceType === type);
+      if (!setup) return;
+
+      const now = new Date();
+      const time = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+      const newAlert = {
+        id: `alert-${Date.now()}`,
+        pair,
+        type,
+        direction: setup.direction,
+        entry: setup.entry,
+        time,
+        dismissed: false,
+      };
+
+      setAlerts((prev) => [newAlert, ...prev].slice(0, 20));
+      setPopupAlert({ pair, type, direction: setup.direction, entry: setup.entry });
+
+      setTimeout(() => setPopupAlert(null), 5000);
+    };
+
+    const initialDelay = setTimeout(triggerAlert, 3000);
+    const interval = setInterval(triggerAlert, 15000);
+    return () => {
+      clearTimeout(initialDelay);
+      clearInterval(interval);
+    };
   }, []);
 
   const filteredSetups = divergenceSetups.filter((s) => {
@@ -720,6 +757,118 @@ export default function Home() {
                   );
                 })}
               </div>
+
+              {/* Popup Alert */}
+              <AnimatePresence>
+                {popupAlert && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                    className="mb-4"
+                  >
+                    <div className={`p-4 rounded-lg border ${
+                      popupAlert.direction === "BUY"
+                        ? "bg-emerald-500/10 border-emerald-500/30"
+                        : "bg-rose-500/10 border-rose-500/30"
+                    }`}>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          popupAlert.direction === "BUY" ? "bg-emerald-500" : "bg-rose-500"
+                        }`}>
+                          {popupAlert.direction === "BUY" ? (
+                            <TrendingUp className="w-5 h-5 text-white" />
+                          ) : (
+                            <TrendingDown className="w-5 h-5 text-white" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-bold text-white">New Divergence Alert</p>
+                            <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                              popupAlert.direction === "BUY" ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"
+                            }`}>
+                              {popupAlert.direction}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-400">
+                            {popupAlert.pair} • {popupAlert.type} • Entry: {popupAlert.entry}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setPopupAlert(null)}
+                          className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                        >
+                          <X className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Alerts Table */}
+              {alerts.length > 0 && (
+                <div className="mb-4">
+                  <div className="bg-[#0E1223] border border-white/5 rounded-lg">
+                    <div className="flex items-center justify-between p-3 border-b border-white/5">
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                        <Bell className="w-3.5 h-3.5" />
+                        Divergence Alerts
+                      </h3>
+                      <span className="text-xs text-slate-600">{alerts.filter((a) => !a.dismissed).length} active</span>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="text-xs text-slate-600 border-b border-white/5">
+                            <th className="text-left px-3 py-2 font-medium">Time</th>
+                            <th className="text-left px-3 py-2 font-medium">Pair</th>
+                            <th className="text-left px-3 py-2 font-medium">Type</th>
+                            <th className="text-left px-3 py-2 font-medium">Signal</th>
+                            <th className="text-left px-3 py-2 font-medium">Entry</th>
+                            <th className="text-right px-3 py-2 font-medium"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {alerts.map((alert) => (
+                            <tr key={alert.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                              <td className="px-3 py-2 text-xs text-slate-500 font-mono">{alert.time}</td>
+                              <td className="px-3 py-2 text-xs font-semibold text-white">{alert.pair}</td>
+                              <td className="px-3 py-2">
+                                <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${
+                                  alert.type.includes("Regular Bullish") ? "bg-emerald-500/20 text-emerald-400" :
+                                  alert.type.includes("Regular Bearish") ? "bg-rose-500/20 text-rose-400" :
+                                  alert.type.includes("Hidden Bullish") ? "bg-cyan-500/20 text-cyan-400" :
+                                  "bg-orange-500/20 text-orange-400"
+                                }`}>
+                                  {alert.type}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2">
+                                <span className={`px-1.5 py-0.5 rounded text-xs font-bold ${
+                                  alert.direction === "BUY" ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"
+                                }`}>
+                                  {alert.direction}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2 text-xs font-mono text-slate-300">{alert.entry}</td>
+                              <td className="px-3 py-2 text-right">
+                                <button
+                                  onClick={() => setAlerts((prev) => prev.filter((a) => a.id !== alert.id))}
+                                  className="w-6 h-6 rounded bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+                                >
+                                  <X className="w-3 h-3 text-slate-500" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* AI Chat Button */}
               <div className="mb-4">
