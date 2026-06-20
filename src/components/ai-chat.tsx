@@ -149,7 +149,7 @@ export default function AiChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 md:inset-auto md:bottom-20 md:right-4 z-50 md:w-[400px] md:h-[500px] md:max-h-[70vh] md:rounded-2xl bg-[#0a0e1a] border-0 md:border border-white/10 shadow-2xl shadow-black/50 flex flex-col overflow-hidden"
+            className="fixed inset-0 md:inset-auto md:bottom-20 md:right-4 z-50 md:w-[800px] md:h-[500px] md:max-h-[70vh] md:rounded-2xl bg-[#0a0e1a] border-0 md:border border-white/10 shadow-2xl shadow-black/50 flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
