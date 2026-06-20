@@ -1161,6 +1161,20 @@ export default function Home() {
                 </p>
               </div>
 
+              {/* Video */}
+              <div className="mb-4">
+                <div className="bg-[#0E1223] border border-white/5 rounded-lg overflow-hidden">
+                  <video
+                    controls
+                    className="w-full aspect-video"
+                    poster=""
+                  >
+                    <source src="/macd-divergence.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              </div>
+
               {/* Key Difference */}
               <div className="bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border border-blue-500/10 rounded-lg p-4 mb-4">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2">
