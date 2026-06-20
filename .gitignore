@@ -17,6 +17,11 @@
 /.next/
 /out/
 
+# video project
+video/node_modules
+video/out
+video/package-lock.json
+
 # production
 /build
 
