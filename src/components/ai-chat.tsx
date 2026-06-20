@@ -121,25 +121,29 @@ export default function AiChat() {
 
   return (
     <>
-      {/* Floating Button */}
-      <motion.button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-20 md:bottom-6 right-4 z-50 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg shadow-blue-500/25 flex items-center justify-center hover:shadow-blue-500/40 transition-shadow"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <AnimatePresence mode="wait">
-          {isOpen ? (
-            <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}>
-              <X className="w-5 h-5 text-white" />
-            </motion.div>
-          ) : (
-            <motion.div key="chat" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }}>
-              <MessageCircle className="w-5 h-5 text-white" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.button>
+      {/* Floating Button - hidden on mobile when chat is open */}
+      {!isOpen && (
+        <motion.button
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-20 md:bottom-6 right-4 z-50 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg shadow-blue-500/25 flex items-center justify-center hover:shadow-blue-500/40 transition-shadow"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <MessageCircle className="w-5 h-5 text-white" />
+        </motion.button>
+      )}
+
+      {/* Desktop floating button - always visible */}
+      {isOpen && (
+        <motion.button
+          onClick={() => setIsOpen(false)}
+          className="hidden md:flex fixed bottom-20 right-4 z-50 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg shadow-blue-500/25 items-center justify-center hover:shadow-blue-500/40 transition-shadow"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <X className="w-5 h-5 text-white" />
+        </motion.button>
+      )}
 
       {/* Chat Panel */}
       <AnimatePresence>
@@ -163,7 +167,12 @@ export default function AiChat() {
                   <span className="text-xs text-emerald-400">Online</span>
                 </div>
               </div>
-              <Sparkles className="w-4 h-4 text-cyan-400" />
+              <button
+                onClick={() => setIsOpen(false)}
+                className="md:hidden w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              >
+                <X className="w-4 h-4 text-white" />
+              </button>
             </div>
 
             {/* Messages */}
