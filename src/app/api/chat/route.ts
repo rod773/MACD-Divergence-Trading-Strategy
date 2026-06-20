@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 
-const invokeUrl = process.env.NVIDIA_BASE_URL;
-const apiKey = process.env.NVIDIA_API_KEY;
-const model = process.env.NVIDIA_MODEL;
+const invokeUrl = process.env.NVIDIA_BASE_URL?.trim();
+const apiKey = process.env.NVIDIA_API_KEY?.trim();
+const model = process.env.NVIDIA_MODEL?.trim();
 
 const systemMessage = {
   role: "system",
