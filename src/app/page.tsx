@@ -532,8 +532,8 @@ export default function Home() {
   const [animatedPrices, setAnimatedPrices] = useState<Record<string, number>>({});
   const [videoPlaying, setVideoPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [alerts, setAlerts] = useState<{ id: string; pair: string; type: string; direction: string; time: string; dismissed: boolean }[]>([]);
-  const [popupAlert, setPopupAlert] = useState<{ pair: string; type: string; direction: string } | null>(null);
+  const [alerts, setAlerts] = useState<{ id: string; pair: string; type: string; direction: string; time: string; dismissed: boolean; stopLoss: number; takeProfit: number }[]>([]);
+  const [popupAlert, setPopupAlert] = useState<{ pair: string; type: string; direction: string; stopLoss: number; takeProfit: number } | null>(null);
   const [liveData, setLiveData] = useState<Record<string, MarketData>>({});
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [lastFetchTime, setLastFetchTime] = useState<string>("");
@@ -558,6 +558,9 @@ export default function Home() {
             if (!knownDivergenceIds.current.has(div.id)) {
               knownDivergenceIds.current.add(div.id);
               const now = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+              const matchedSetup = divergenceSetups.find(
+                (s) => s.pair === div.pair && s.divergenceType === div.divergenceType && s.direction === div.direction
+              );
               const newAlert = {
                 id: div.id,
                 pair: div.pair,
@@ -565,9 +568,11 @@ export default function Home() {
                 direction: div.direction,
                 time: now,
                 dismissed: false,
+                stopLoss: matchedSetup?.stopLoss || 0,
+                takeProfit: matchedSetup?.takeProfit1 || 0,
               };
               setAlerts((prev) => [newAlert, ...prev].slice(0, 20));
-              setPopupAlert({ pair: div.pair, type: div.divergenceType, direction: div.direction });
+              setPopupAlert({ pair: div.pair, type: div.divergenceType, direction: div.direction, stopLoss: matchedSetup?.stopLoss || 0, takeProfit: matchedSetup?.takeProfit1 || 0 });
               setTimeout(() => setPopupAlert(null), 8000);
               break; // Only show one popup alert per fetch cycle
             }
@@ -846,6 +851,16 @@ export default function Home() {
                           <p className="text-xs text-slate-400">
                             {popupAlert.pair} • {popupAlert.type}
                           </p>
+                          {(popupAlert.stopLoss > 0 || popupAlert.takeProfit > 0) && (
+                            <div className="flex items-center gap-3 mt-1">
+                              {popupAlert.stopLoss > 0 && (
+                                <span className="text-xs font-mono text-rose-400">SL: {popupAlert.stopLoss}</span>
+                              )}
+                              {popupAlert.takeProfit > 0 && (
+                                <span className="text-xs font-mono text-emerald-400">TP: {popupAlert.takeProfit}</span>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <button
                           onClick={() => setPopupAlert(null)}
@@ -878,6 +893,8 @@ export default function Home() {
                             <th className="text-left px-3 py-2 font-medium">Pair</th>
                             <th className="text-left px-3 py-2 font-medium">Type</th>
                             <th className="text-left px-3 py-2 font-medium">Signal</th>
+                            <th className="text-right px-3 py-2 font-medium">SL</th>
+                            <th className="text-right px-3 py-2 font-medium">TP</th>
                             <th className="text-right px-3 py-2 font-medium"></th>
                           </tr>
                         </thead>
@@ -902,6 +919,12 @@ export default function Home() {
                                 }`}>
                                   {alert.direction}
                                 </span>
+                              </td>
+                              <td className="px-3 py-2 text-right">
+                                <span className="text-xs font-mono tabular-nums text-rose-400">{alert.stopLoss || "—"}</span>
+                              </td>
+                              <td className="px-3 py-2 text-right">
+                                <span className="text-xs font-mono tabular-nums text-emerald-400">{alert.takeProfit || "—"}</span>
                               </td>
                               <td className="px-3 py-2 text-right">
                                 <button
