@@ -95,7 +95,7 @@ export default function AiChat() {
       const aiMsg: Message = {
         id: `ai-${Date.now()}`,
         role: "assistant",
-        content: data.reply || "Sorry, I could not generate a response.",
+        content: data.reply || data.error || "Sorry, I could not generate a response.",
         timestamp: Date.now(),
       };
       setMessages(prev => [...prev, aiMsg]);
@@ -149,7 +149,7 @@ export default function AiChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-34 md:bottom-20 right-4 z-50 w-[calc(100vw-2rem)] max-w-[400px] h-[500px] max-h-[70vh] bg-[#0a0e1a] border border-white/10 rounded-2xl shadow-2xl shadow-black/50 flex flex-col overflow-hidden"
+            className="fixed inset-0 md:inset-auto md:bottom-20 md:right-4 z-50 md:w-[400px] md:h-[500px] md:max-h-[70vh] md:rounded-2xl bg-[#0a0e1a] border-0 md:border border-white/10 shadow-2xl shadow-black/50 flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">

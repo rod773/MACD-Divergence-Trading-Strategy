@@ -53,7 +53,7 @@ const systemMessage = {
 export async function POST(request: NextRequest) {
   try {
     if (!invokeUrl || !apiKey || !model) {
-      return NextResponse.json({ error: "Missing NVIDIA API configuration" }, { status: 500 });
+      return NextResponse.json({ error: "Missing NVIDIA API configuration. Check your .env file." }, { status: 500 });
     }
 
     const { messages } = await request.json();
@@ -73,16 +73,23 @@ export async function POST(request: NextRequest) {
           Authorization: `Bearer ${apiKey}`,
           Accept: "application/json",
         },
+        timeout: 30000,
       }
     );
 
-    const reply = response.data.choices?.[0]?.message?.content || "No response received.";
+    const reply = response.data.choices?.[0]?.message?.content;
+
+    if (!reply) {
+      return NextResponse.json({ error: "Empty response from AI model.", raw: response.data }, { status: 502 });
+    }
 
     return NextResponse.json({ reply });
   } catch (error) {
-    console.error("Chat API error:", error);
+    const err = error as { response?: { status?: number; data?: unknown }; message?: string };
+    console.error("Chat API error:", err.message, err.response?.status, err.response?.data);
+    const detail = err.response?.data ? JSON.stringify(err.response.data) : err.message;
     return NextResponse.json(
-      { error: "Failed to get AI response" },
+      { error: `AI request failed: ${detail}` },
       { status: 500 }
     );
   }
