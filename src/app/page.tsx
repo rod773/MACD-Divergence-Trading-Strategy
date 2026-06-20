@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp,
   TrendingDown,
-  Activity,
   BarChart3,
   Target,
   Shield,
@@ -28,7 +27,9 @@ import {
   EyeOff,
   ArrowRight,
   RefreshCw,
+  MessageCircle,
 } from "lucide-react";
+import AiChat from "@/components/ai-chat";
 
 interface DivergenceSetup {
   id: string;
@@ -587,7 +588,7 @@ export default function Home() {
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center">
-                <Activity className="w-4 h-4 text-white" />
+                <img src="/favicon.ico" alt="Logo" className="w-5 h-5" />
               </div>
               <span className="font-semibold text-sm tracking-tight hidden sm:block">
                 MACD Divergence Pro
@@ -618,12 +619,12 @@ export default function Home() {
             </nav>
 
             <div className="flex items-center gap-2">
-              <div className="flex bg-white/5 rounded-md p-0.5 border border-white/5">
+              <div className="flex bg-white/5 rounded-md p-0.5 border border-white/5 overflow-x-auto max-w-[200px] sm:max-w-none">
                 {(["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD"] as const).map((pair) => (
                   <button
                     key={pair}
                     onClick={() => setSelectedPair(pair)}
-                    className={`px-2.5 py-1 rounded text-[10px] font-medium transition-all ${
+                    className={`px-2 sm:px-2.5 py-1 rounded text-sm sm:text-xs font-medium transition-all whitespace-nowrap ${
                       selectedPair === pair
                         ? "bg-white/15 text-white"
                         : "text-slate-500 hover:text-slate-300"
@@ -633,7 +634,7 @@ export default function Home() {
                   </button>
                 ))}
               </div>
-              <button className="p-2 rounded-md text-slate-400 hover:text-white hover:bg-white/5 transition-colors">
+              <button className="p-2 rounded-md text-slate-400 hover:text-white hover:bg-white/5 transition-colors hidden sm:block">
                 <Bell className="w-4 h-4" />
               </button>
               <button
@@ -684,7 +685,7 @@ export default function Home() {
         </AnimatePresence>
       </header>
 
-      <main className="max-w-[1440px] mx-auto px-4 lg:px-6 py-4">
+      <main className="max-w-[1440px] mx-auto px-3 sm:px-4 lg:px-6 py-4 pb-20 md:pb-4">
         <AnimatePresence mode="wait">
           {/* DASHBOARD TAB */}
           {activeTab === "dashboard" && (
@@ -708,12 +709,23 @@ export default function Home() {
                       transition={{ delay: i * 0.05 }}
                       className="bg-[#0E1223] border border-white/5 rounded-lg p-3"
                     >
-                      <p className="text-[9px] uppercase tracking-wider text-slate-600 mb-1">{kpi.label}</p>
-                      <p className={`text-xl font-bold ${kpi.color}`}>{count}</p>
-                      <p className="text-[10px] text-slate-500 mt-0.5">{kpi.sub} {avg > 0 ? `• ${avg}% avg` : ""}</p>
+                      <p className="text-sm uppercase tracking-wider text-slate-600 mb-1">{kpi.label}</p>
+                      <p className={`text-2xl font-bold ${kpi.color}`}>{count}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{kpi.sub} {avg > 0 ? `• ${avg}% avg` : ""}</p>
                     </motion.div>
                   );
                 })}
+              </div>
+
+              {/* AI Chat Button */}
+              <div className="mb-4">
+                <button
+                  onClick={() => window.dispatchEvent(new Event("open-ai-chat"))}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 hover:border-blue-500/40 hover:from-blue-500/15 hover:to-cyan-500/15 transition-all text-sm font-medium text-blue-300"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Ask AI Assistant about setups and strategies
+                </button>
               </div>
 
               {/* Price Overview */}
@@ -733,10 +745,10 @@ export default function Home() {
                           </div>
                           <div>
                             <h3 className="font-semibold text-sm">AUD/USD</h3>
-                            <p className="text-[10px] text-slate-500">Australian Dollar / US Dollar</p>
+                            <p className="text-xs text-slate-500">Australian Dollar / US Dollar</p>
                           </div>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30">
                           Strong Sell
                         </span>
                       </div>
@@ -748,16 +760,16 @@ export default function Home() {
                       </div>
                       <div className="grid grid-cols-3 gap-3 pt-3 border-t border-white/5">
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600">Day Range</p>
-                          <p className="text-[11px] font-medium tabular-nums">0.6989 - 0.7029</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600">Day Range</p>
+                          <p className="text-sm font-medium tabular-nums">0.6989 - 0.7029</p>
                         </div>
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600">52W Range</p>
-                          <p className="text-[11px] font-medium tabular-nums">0.6372 - 0.7279</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600">52W Range</p>
+                          <p className="text-sm font-medium tabular-nums">0.6372 - 0.7279</p>
                         </div>
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600">RSI (14)</p>
-                          <p className="text-[11px] font-medium text-rose-400">72 Overbought</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600">RSI (14)</p>
+                          <p className="text-sm font-medium text-rose-400">72 Overbought</p>
                         </div>
                       </div>
                     </>
@@ -770,10 +782,10 @@ export default function Home() {
                           </div>
                           <div>
                             <h3 className="font-semibold text-sm">XAU/USD</h3>
-                            <p className="text-[10px] text-slate-500">Gold</p>
+                            <p className="text-xs text-slate-500">Gold</p>
                           </div>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30">
                           Strong Sell
                         </span>
                       </div>
@@ -785,16 +797,16 @@ export default function Home() {
                       </div>
                       <div className="grid grid-cols-3 gap-3 pt-3 border-t border-white/5">
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600">Day Range</p>
-                          <p className="text-[11px] font-medium tabular-nums">4,139 - 4,233</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600">Day Range</p>
+                          <p className="text-sm font-medium tabular-nums">4,139 - 4,233</p>
                         </div>
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600">52W Range</p>
-                          <p className="text-[11px] font-medium tabular-nums">3,250 - 5,626</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600">52W Range</p>
+                          <p className="text-sm font-medium tabular-nums">3,250 - 5,626</p>
                         </div>
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600">Volume</p>
-                          <p className="text-[11px] font-medium">73,110</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600">Volume</p>
+                          <p className="text-sm font-medium">73,110</p>
                         </div>
                       </div>
                     </>
@@ -807,10 +819,10 @@ export default function Home() {
                           </div>
                           <div>
                             <h3 className="font-semibold text-sm">ETH/USD</h3>
-                            <p className="text-[10px] text-slate-500">Ethereum</p>
+                            <p className="text-xs text-slate-500">Ethereum</p>
                           </div>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30">
                           Sell
                         </span>
                       </div>
@@ -822,16 +834,16 @@ export default function Home() {
                       </div>
                       <div className="grid grid-cols-3 gap-3 pt-3 border-t border-white/5">
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600">Day Range</p>
-                          <p className="text-[11px] font-medium tabular-nums">3,450 - 3,620</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600">Day Range</p>
+                          <p className="text-sm font-medium tabular-nums">3,450 - 3,620</p>
                         </div>
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600">52W Range</p>
-                          <p className="text-[11px] font-medium tabular-nums">2,200 - 4,100</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600">52W Range</p>
+                          <p className="text-sm font-medium tabular-nums">2,200 - 4,100</p>
                         </div>
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600">Volume</p>
-                          <p className="text-[11px] font-medium">18.2B</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600">Volume</p>
+                          <p className="text-sm font-medium">18.2B</p>
                         </div>
                       </div>
                     </>
@@ -844,10 +856,10 @@ export default function Home() {
                           </div>
                           <div>
                             <h3 className="font-semibold text-sm">BTC/USD</h3>
-                            <p className="text-[10px] text-slate-500">Bitcoin</p>
+                            <p className="text-xs text-slate-500">Bitcoin</p>
                           </div>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                           Buy
                         </span>
                       </div>
@@ -859,16 +871,16 @@ export default function Home() {
                       </div>
                       <div className="grid grid-cols-3 gap-3 pt-3 border-t border-white/5">
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600">Day Range</p>
-                          <p className="text-[11px] font-medium tabular-nums">103,200 - 106,100</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600">Day Range</p>
+                          <p className="text-sm font-medium tabular-nums">103,200 - 106,100</p>
                         </div>
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600">52W Range</p>
-                          <p className="text-[11px] font-medium tabular-nums">58,800 - 112,000</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600">52W Range</p>
+                          <p className="text-sm font-medium tabular-nums">58,800 - 112,000</p>
                         </div>
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600">RSI (14)</p>
-                          <p className="text-[11px] font-medium text-amber-400">58 Neutral</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600">RSI (14)</p>
+                          <p className="text-sm font-medium text-amber-400">58 Neutral</p>
                         </div>
                       </div>
                     </>
@@ -882,7 +894,7 @@ export default function Home() {
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                     All Divergence Signals
                   </h3>
-                  <span className="text-[10px] text-slate-600">{filteredSetups.length} active</span>
+                  <span className="text-xs text-slate-600">{filteredSetups.length} active</span>
                 </div>
                 <div className="divide-y divide-white/5">
                   {filteredSetups.map((setup, i) => (
@@ -909,18 +921,18 @@ export default function Home() {
                         <div>
                           <div className="flex items-center gap-2">
                             <p className="text-xs font-semibold">{setup.pair}</p>
-                            <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium border ${getDivergenceBadge(setup.divergenceType)}`}>
+                            <span className={`px-1.5 py-0.5 rounded text-sm font-medium border ${getDivergenceBadge(setup.divergenceType)}`}>
                               {setup.divergenceType}
                             </span>
                           </div>
-                          <p className="text-[10px] text-slate-500">
+                          <p className="text-xs text-slate-500">
                             {setup.signalMeaning} • {setup.trendContext}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right hidden sm:block">
-                          <p className="text-[10px] text-slate-600">Probability</p>
+                          <p className="text-xs text-slate-600">Probability</p>
                           <p className={`text-xs font-bold tabular-nums ${
                             setup.probability >= 70 ? "text-emerald-400" : setup.probability >= 60 ? "text-amber-400" : "text-slate-400"
                           }`}>
@@ -928,7 +940,7 @@ export default function Home() {
                           </p>
                         </div>
                         <div className="text-right hidden sm:block">
-                          <p className="text-[10px] text-slate-600">Target</p>
+                          <p className="text-xs text-slate-600">Target</p>
                           <p className="text-xs font-mono tabular-nums text-emerald-400">
                             {setup.takeProfit1}
                           </p>
@@ -952,7 +964,7 @@ export default function Home() {
                     <button
                       key={t}
                       onClick={() => setSelectedType(t)}
-                      className={`px-2 py-1 rounded text-[10px] font-medium transition-colors ${
+                      className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
                         selectedType === t ? "bg-white/10 text-white" : "text-slate-500 hover:text-white hover:bg-white/5"
                       }`}
                     >
@@ -985,42 +997,42 @@ export default function Home() {
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <h3 className="text-sm font-bold">{setup.pair}</h3>
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${setup.direction === "BUY" ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"}`}>
+                              <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${setup.direction === "BUY" ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"}`}>
                                 {setup.direction}
                               </span>
-                              <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium border ${getDivergenceBadge(setup.divergenceType)}`}>
+                              <span className={`px-1.5 py-0.5 rounded text-sm font-medium border ${getDivergenceBadge(setup.divergenceType)}`}>
                                 {setup.divergenceType}
                               </span>
-                              <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium border ${getConfidenceColor(setup.confidence)}`}>
+                              <span className={`px-1.5 py-0.5 rounded text-sm font-medium border ${getConfidenceColor(setup.confidence)}`}>
                                 {setup.confidence}
                               </span>
                             </div>
-                            <p className="text-[10px] text-slate-500 mt-0.5">
+                            <p className="text-xs text-slate-500 mt-0.5">
                               {setup.timeframe} • {setup.signalMeaning} • {setup.trendContext}
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600">Current</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600">Current</p>
                           <p className="text-sm font-mono font-bold tabular-nums">{setup.currentPrice}</p>
                         </div>
                       </div>
 
-                      <p className="text-[11px] text-slate-400 leading-relaxed mb-3">{setup.analysis}</p>
+                      <p className="text-sm text-slate-400 leading-relaxed mb-3">{setup.analysis}</p>
 
                       {/* Price Action & MACD Behavior */}
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
                         <div className="bg-[#080B14] rounded-lg p-2">
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600 mb-0.5">Price Action</p>
-                          <p className="text-[10px] text-slate-300">{setup.priceAction}</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600 mb-0.5">Price Action</p>
+                          <p className="text-xs text-slate-300">{setup.priceAction}</p>
                         </div>
                         <div className="bg-[#080B14] rounded-lg p-2">
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600 mb-0.5">MACD Behavior</p>
-                          <p className="text-[10px] text-slate-300">{setup.macdBehavior}</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600 mb-0.5">MACD Behavior</p>
+                          <p className="text-xs text-slate-300">{setup.macdBehavior}</p>
                         </div>
                         <div className="bg-[#080B14] rounded-lg p-2">
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600 mb-0.5">Confirmation</p>
-                          <p className="text-[10px] text-slate-300">{setup.confirmation}</p>
+                          <p className="text-sm uppercase tracking-wider text-slate-600 mb-0.5">Confirmation</p>
+                          <p className="text-xs text-slate-300">{setup.confirmation}</p>
                         </div>
                       </div>
                     </div>
@@ -1029,7 +1041,7 @@ export default function Home() {
                     <div className="px-4 pb-3">
                       <div className="bg-[#080B14] rounded-lg p-3">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] uppercase tracking-wider text-slate-500">Win Probability</span>
+                          <span className="text-xs uppercase tracking-wider text-slate-500">Win Probability</span>
                           <span className={`text-lg font-bold tabular-nums ${
                             setup.probability >= 70 ? "text-emerald-400" : setup.probability >= 60 ? "text-amber-400" : "text-slate-400"
                           }`}>
@@ -1046,15 +1058,15 @@ export default function Home() {
                         </div>
                         <div className="grid grid-cols-3 gap-2">
                           <div className="text-center">
-                            <p className="text-[9px] uppercase tracking-wider text-slate-600">Win Rate</p>
+                            <p className="text-sm uppercase tracking-wider text-slate-600">Win Rate</p>
                             <p className="text-xs font-bold text-emerald-400">{setup.winRate}</p>
                           </div>
                           <div className="text-center">
-                            <p className="text-[9px] uppercase tracking-wider text-slate-600">Expected</p>
+                            <p className="text-sm uppercase tracking-wider text-slate-600">Expected</p>
                             <p className="text-xs font-bold text-cyan-400">{setup.expectedReturn}</p>
                           </div>
                           <div className="text-center">
-                            <p className="text-[9px] uppercase tracking-wider text-slate-600">Risk</p>
+                            <p className="text-sm uppercase tracking-wider text-slate-600">Risk</p>
                             <p className="text-xs font-bold text-rose-400">{setup.riskAmount}</p>
                           </div>
                         </div>
@@ -1062,36 +1074,36 @@ export default function Home() {
                     </div>
 
                     {/* Trade Levels */}
-                    <div className="px-4 pb-3">
-                      <div className="grid grid-cols-5 gap-2 bg-[#080B14] rounded-lg p-3">
+                    <div className="px-3 sm:px-4 pb-3">
+                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 bg-[#080B14] rounded-lg p-2.5 sm:p-3">
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600 mb-1">Entry</p>
-                          <p className="text-sm font-mono font-bold tabular-nums">{setup.entry}</p>
+                          <p className="text-sm sm:text-base uppercase tracking-wider text-slate-600 mb-1">Entry</p>
+                          <p className="text-sm sm:text-base font-mono font-bold tabular-nums">{setup.entry}</p>
                         </div>
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600 mb-1">Stop Loss</p>
-                          <p className="text-sm font-mono font-bold tabular-nums text-rose-400">{setup.stopLoss}</p>
-                          <p className="text-[9px] text-slate-600 tabular-nums">
-                            {getPips(setup.entry, setup.stopLoss, setup.pair)} {setup.pair.includes("XAU") ? "pts" : "pips"}
+                          <p className="text-sm sm:text-base uppercase tracking-wider text-slate-600 mb-1">Stop Loss</p>
+                          <p className="text-sm sm:text-base font-mono font-bold tabular-nums text-rose-400">{setup.stopLoss}</p>
+                          <p className="text-sm sm:text-base text-slate-600 tabular-nums">
+                            {getPips(setup.entry, setup.stopLoss, setup.pair)} {setup.pair.includes("XAU") || setup.pair.includes("BTC") || setup.pair.includes("ETH") ? "pts" : "pips"}
                           </p>
                         </div>
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600 mb-1">TP1</p>
-                          <p className="text-sm font-mono font-bold tabular-nums text-emerald-400">{setup.takeProfit1}</p>
-                          <p className="text-[9px] text-slate-600 tabular-nums">
-                            +{getPips(setup.entry, setup.takeProfit1, setup.pair)} {setup.pair.includes("XAU") ? "pts" : "pips"}
+                          <p className="text-sm sm:text-base uppercase tracking-wider text-slate-600 mb-1">TP1</p>
+                          <p className="text-sm sm:text-base font-mono font-bold tabular-nums text-emerald-400">{setup.takeProfit1}</p>
+                          <p className="text-sm sm:text-base text-slate-600 tabular-nums">
+                            +{getPips(setup.entry, setup.takeProfit1, setup.pair)} {setup.pair.includes("XAU") || setup.pair.includes("BTC") || setup.pair.includes("ETH") ? "pts" : "pips"}
                           </p>
                         </div>
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600 mb-1">TP2</p>
-                          <p className="text-sm font-mono font-bold tabular-nums text-emerald-400">{setup.takeProfit2}</p>
-                          <p className="text-[9px] text-slate-600 tabular-nums">
-                            +{getPips(setup.entry, setup.takeProfit2, setup.pair)} {setup.pair.includes("XAU") ? "pts" : "pips"}
+                          <p className="text-sm sm:text-base uppercase tracking-wider text-slate-600 mb-1">TP2</p>
+                          <p className="text-sm sm:text-base font-mono font-bold tabular-nums text-emerald-400">{setup.takeProfit2}</p>
+                          <p className="text-sm sm:text-base text-slate-600 tabular-nums">
+                            +{getPips(setup.entry, setup.takeProfit2, setup.pair)} {setup.pair.includes("XAU") || setup.pair.includes("BTC") || setup.pair.includes("ETH") ? "pts" : "pips"}
                           </p>
                         </div>
                         <div>
-                          <p className="text-[9px] uppercase tracking-wider text-slate-600 mb-1">R:R</p>
-                          <p className="text-sm font-mono font-bold tabular-nums text-amber-400">
+                          <p className="text-sm sm:text-base uppercase tracking-wider text-slate-600 mb-1">R:R</p>
+                          <p className="text-sm sm:text-base font-mono font-bold tabular-nums text-amber-400">
                             1:{getRR(setup.entry, setup.stopLoss, setup.takeProfit1)}
                           </p>
                         </div>
@@ -1128,8 +1140,8 @@ export default function Home() {
               >
                 <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-[11px] font-medium text-amber-200 mb-0.5">Risk Disclaimer</p>
-                  <p className="text-[10px] text-amber-200/60 leading-relaxed">
+                  <p className="text-sm font-medium text-amber-200 mb-0.5">Risk Disclaimer</p>
+                  <p className="text-xs text-amber-200/60 leading-relaxed">
                     Educational analysis based on MACD divergence patterns. Trading involves substantial risk of loss. Never risk more than 1-2% of your account per trade. Past performance does not guarantee future results.
                   </p>
                 </div>
@@ -1154,14 +1166,14 @@ export default function Home() {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-[#080B14] rounded-lg p-3">
-                    <p className="text-[11px] font-semibold text-amber-400 mb-1">Regular Divergence</p>
-                    <p className="text-[10px] text-slate-400">Signals REVERSAL — Trend may be ending</p>
-                    <p className="text-[10px] text-slate-500 mt-1">Use at support/resistance for counter-trend entries</p>
+                    <p className="text-sm font-semibold text-amber-400 mb-1">Regular Divergence</p>
+                    <p className="text-xs text-slate-400">Signals REVERSAL — Trend may be ending</p>
+                    <p className="text-xs text-slate-500 mt-1">Use at support/resistance for counter-trend entries</p>
                   </div>
                   <div className="bg-[#080B14] rounded-lg p-3">
-                    <p className="text-[11px] font-semibold text-cyan-400 mb-1">Hidden Divergence</p>
-                    <p className="text-[10px] text-slate-400">Signals CONTINUATION — Trend resuming after pullback</p>
-                    <p className="text-[10px] text-slate-500 mt-1">Use during pullbacks for trend-following entries</p>
+                    <p className="text-sm font-semibold text-cyan-400 mb-1">Hidden Divergence</p>
+                    <p className="text-xs text-slate-400">Signals CONTINUATION — Trend resuming after pullback</p>
+                    <p className="text-xs text-slate-500 mt-1">Use during pullbacks for trend-following entries</p>
                   </div>
                 </div>
               </div>
@@ -1195,7 +1207,7 @@ export default function Home() {
                         </div>
                         <div>
                           <h3 className="text-sm font-semibold">{div.type} Divergence</h3>
-                          <p className="text-[10px] text-slate-500">{div.meaning} • {div.reliability}</p>
+                          <p className="text-xs text-slate-500">{div.meaning} • {div.reliability}</p>
                         </div>
                       </div>
                       {/* Mini chart */}
@@ -1274,9 +1286,9 @@ export default function Home() {
                           )}
                         </svg>
                       </div>
-                      <p className="text-[11px] text-slate-300 font-mono mb-2">{div.description}</p>
-                      <p className="text-[10px] text-slate-500 mb-2">{div.trendContext}</p>
-                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-medium ${signalColorMap[div.signal]}`}>
+                      <p className="text-sm text-slate-300 font-mono mb-2">{div.description}</p>
+                      <p className="text-xs text-slate-500 mb-2">{div.trendContext}</p>
+                      <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${signalColorMap[div.signal]}`}>
                         Signal: {div.signal}
                       </span>
                     </motion.div>
@@ -1292,7 +1304,7 @@ export default function Home() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Regular Bullish */}
                   <div className="bg-[#080B14] rounded-lg p-3">
-                    <p className="text-[11px] font-semibold text-emerald-400 mb-2">Regular Bullish Divergence</p>
+                    <p className="text-sm font-semibold text-emerald-400 mb-2">Regular Bullish Divergence</p>
                     <svg viewBox="0 0 320 140" className="w-full h-auto">
                       <defs>
                         <linearGradient id="priceGreen" x1="0" y1="0" x2="0" y2="1">
@@ -1324,7 +1336,7 @@ export default function Home() {
                       {/* Signal arrow */}
                       <text x="270" y="135" fill="#10b981" fontSize="7" fontWeight="bold" fontFamily="monospace">BUY ▲</text>
                     </svg>
-                    <div className="text-[9px] font-mono text-slate-500 mt-1 space-y-0.5">
+                    <div className="text-sm font-mono text-slate-500 mt-1 space-y-0.5">
                       <p>Price: LL → LL (Lower Lows)</p>
                       <p>MACD: HL → HL (Higher Lows)</p>
                       <p className="text-emerald-400">Signal: BUY (Reversal Up)</p>
@@ -1332,7 +1344,7 @@ export default function Home() {
                   </div>
                   {/* Regular Bearish */}
                   <div className="bg-[#080B14] rounded-lg p-3">
-                    <p className="text-[11px] font-semibold text-rose-400 mb-2">Regular Bearish Divergence</p>
+                    <p className="text-sm font-semibold text-rose-400 mb-2">Regular Bearish Divergence</p>
                     <svg viewBox="0 0 320 140" className="w-full h-auto">
                       <line x1="0" y1="70" x2="320" y2="70" stroke="#334155" strokeWidth="0.5" strokeDasharray="4"/>
                       <text x="4" y="12" fill="#64748b" fontSize="7" fontFamily="monospace">PRICE</text>
@@ -1355,7 +1367,7 @@ export default function Home() {
                       <text x="185" y="78" fill="#10b981" fontSize="5" fontFamily="monospace" opacity="0.7">↘ falling</text>
                       <text x="270" y="135" fill="#f87171" fontSize="7" fontWeight="bold" fontFamily="monospace">SELL ▼</text>
                     </svg>
-                    <div className="text-[9px] font-mono text-slate-500 mt-1 space-y-0.5">
+                    <div className="text-sm font-mono text-slate-500 mt-1 space-y-0.5">
                       <p>Price: HH → HH (Higher Highs)</p>
                       <p>MACD: LH → LH (Lower Highs)</p>
                       <p className="text-rose-400">Signal: SELL (Reversal Down)</p>
@@ -1363,7 +1375,7 @@ export default function Home() {
                   </div>
                   {/* Hidden Bullish */}
                   <div className="bg-[#080B14] rounded-lg p-3">
-                    <p className="text-[11px] font-semibold text-cyan-400 mb-2">Hidden Bullish Divergence</p>
+                    <p className="text-sm font-semibold text-cyan-400 mb-2">Hidden Bullish Divergence</p>
                     <svg viewBox="0 0 320 140" className="w-full h-auto">
                       <line x1="0" y1="70" x2="320" y2="70" stroke="#334155" strokeWidth="0.5" strokeDasharray="4"/>
                       <text x="4" y="12" fill="#64748b" fontSize="7" fontFamily="monospace">PRICE</text>
@@ -1386,7 +1398,7 @@ export default function Home() {
                       <text x="210" y="128" fill="#06b6d4" fontSize="5" fontFamily="monospace" opacity="0.7">↘ falling</text>
                       <text x="270" y="135" fill="#06b6d4" fontSize="7" fontWeight="bold" fontFamily="monospace">BUY ▲</text>
                     </svg>
-                    <div className="text-[9px] font-mono text-slate-500 mt-1 space-y-0.5">
+                    <div className="text-sm font-mono text-slate-500 mt-1 space-y-0.5">
                       <p>Price: HL → HL (Higher Lows)</p>
                       <p>MACD: LL → LL (Lower Lows)</p>
                       <p className="text-cyan-400">Signal: BUY (Uptrend Continues)</p>
@@ -1394,7 +1406,7 @@ export default function Home() {
                   </div>
                   {/* Hidden Bearish */}
                   <div className="bg-[#080B14] rounded-lg p-3">
-                    <p className="text-[11px] font-semibold text-orange-400 mb-2">Hidden Bearish Divergence</p>
+                    <p className="text-sm font-semibold text-orange-400 mb-2">Hidden Bearish Divergence</p>
                     <svg viewBox="0 0 320 140" className="w-full h-auto">
                       <line x1="0" y1="70" x2="320" y2="70" stroke="#334155" strokeWidth="0.5" strokeDasharray="4"/>
                       <text x="4" y="12" fill="#64748b" fontSize="7" fontFamily="monospace">PRICE</text>
@@ -1417,7 +1429,7 @@ export default function Home() {
                       <text x="210" y="108" fill="#f97316" fontSize="5" fontFamily="monospace" opacity="0.7">↗ rising</text>
                       <text x="270" y="135" fill="#f97316" fontSize="7" fontWeight="bold" fontFamily="monospace">SELL ▼</text>
                     </svg>
-                    <div className="text-[9px] font-mono text-slate-500 mt-1 space-y-0.5">
+                    <div className="text-sm font-mono text-slate-500 mt-1 space-y-0.5">
                       <p>Price: LH → LH (Lower Highs)</p>
                       <p>MACD: HH → HH (Higher Highs)</p>
                       <p className="text-orange-400">Signal: SELL (Downtrend Continues)</p>
@@ -1442,8 +1454,8 @@ export default function Home() {
                     { title: "Risk:Reward 1:2+", desc: "Minimum 1:2 R:R for profitable trades" },
                   ].map((rule) => (
                     <div key={rule.title} className="bg-[#080B14] rounded-lg p-3">
-                      <p className="text-[11px] font-semibold mb-1">{rule.title}</p>
-                      <p className="text-[10px] text-slate-500">{rule.desc}</p>
+                      <p className="text-sm font-semibold mb-1">{rule.title}</p>
+                      <p className="text-xs text-slate-500">{rule.desc}</p>
                     </div>
                   ))}
                 </div>
@@ -1453,12 +1465,40 @@ export default function Home() {
         </AnimatePresence>
       </main>
 
-      <footer className="border-t border-white/5 mt-8 py-4">
+      <footer className="border-t border-white/5 mt-8 py-4 hidden md:block">
         <div className="max-w-[1440px] mx-auto px-4 lg:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-[10px] text-slate-600">MACD Divergence Trading Strategy • Educational Only</p>
-          <p className="text-[10px] text-slate-600">Data: Investing.com • Updated June 20, 2026</p>
+          <p className="text-xs text-slate-600">MACD Divergence Trading Strategy • Educational Only</p>
+          <p className="text-xs text-slate-600">Data: Investing.com • Updated June 20, 2026</p>
         </div>
       </footer>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/5 bg-[#020617]/95 backdrop-blur-xl safe-area-bottom">
+        <div className="flex items-center justify-around h-14 px-2">
+          {(
+            [
+              { id: "dashboard", label: "Dashboard", icon: BarChart3 },
+              { id: "trades", label: "Trades", icon: Target },
+              { id: "learn", label: "Guide", icon: BookOpen },
+            ] as const
+          ).map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                activeTab === tab.id
+                  ? "text-white bg-white/10"
+                  : "text-slate-500"
+              }`}
+            >
+              <tab.icon className="w-4.5 h-4.5" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      <AiChat />
     </div>
   );
 }

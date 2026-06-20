@@ -1,36 +1,156 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MACD Divergence Trading Strategy
 
-## Getting Started
+A Next.js web application that identifies and displays MACD (Moving Average Convergence Divergence) divergence patterns across multiple financial instruments, with an AI-powered chat assistant for trade analysis.
 
-First, run the development server:
+## Features
+
+### Dashboard
+- Real-time overview of all active divergence signals
+- Summary cards showing signal counts by type (Regular Bullish, Regular Bearish, Hidden Bullish, Hidden Bearish)
+- Price overview for the selected pair with market data (day range, 52W range, RSI)
+- Animated price ticker with live price simulation
+- Quick navigation to detailed trade setups
+
+### Trade Setups
+- 16 divergence setups across 4 pairs: AUD/USD, XAU/USD (Gold), ETH/USD, BTC/USD
+- 4 divergence types per pair: Regular Bullish, Regular Bearish, Hidden Bullish, Hidden Bearish
+- Each setup includes:
+  - Entry, Stop Loss, Take Profit 1 & 2 levels
+  - Win probability and risk-reward ratio
+  - Price action analysis and MACD behavior description
+  - Confirmation criteria
+  - Confidence level (HIGH / MEDIUM / LOW)
+- Filter by divergence type
+- Visual risk bar showing SL vs TP distance
+
+### Divergence Guide
+- Educational content explaining all 4 divergence types
+- SVG visual pattern references for each type
+- Regular vs Hidden divergence comparison
+- Trading rules and best practices
+
+### AI Chat Assistant
+- Floating chat widget accessible from the dashboard
+- Powered by NVIDIA Kimi K2.6 model via API
+- Can answer questions about:
+  - Current trade setups and recommendations
+  - MACD divergence patterns (Regular vs Hidden)
+  - Risk management strategies
+  - Entry/exit timing
+  - Pair-specific analysis (BTC, ETH, Gold, AUD)
+- Quick-action buttons for common questions
+- Full conversation history within the session
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v4
+- **Animations:** Framer Motion
+- **Icons:** Lucide React
+- **AI Backend:** NVIDIA API (Kimi K2.6 model)
+- **HTTP Client:** Axios
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── chat/
+│   │       └── route.ts          # AI chat API endpoint (NVIDIA proxy)
+│   ├── globals.css               # Global styles and Tailwind config
+│   ├── layout.tsx                # Root layout
+│   └── page.tsx                  # Main application page
+├── components/
+│   ├── ai-chat.tsx               # AI chat widget component
+│   └── ui/
+│       └── button.tsx            # Base button component
+└── lib/
+    └── utils.ts                  # Utility functions
+```
+
+## Setup
+
+### Prerequisites
+- Node.js 18+
+- npm, yarn, or pnpm
+- NVIDIA API key (get one at [build.nvidia.com](https://build.nvidia.com))
+
+### Installation
+
+```bash
+git clone <repository-url>
+cd macd-divergence-trading-strategy
+npm install
+```
+
+### Environment Variables
+
+Create a `.env` file in the project root:
+
+```bash
+cp .env.example .env
+```
+
+Then fill in your NVIDIA API key:
+
+```
+NVIDIA_API_KEY=your_api_key_here
+NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1/chat/completions
+NVIDIA_MODEL=moonshotai/kimi-k2.6
+```
+
+### Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Divergence Types Explained
 
-To learn more about Next.js, take a look at the following resources:
+| Type | Pattern | Signal | Context |
+|------|---------|--------|---------|
+| Regular Bullish | Price LL, MACD HL | BUY | Reversal in downtrend |
+| Regular Bearish | Price HH, MACD LH | SELL | Reversal in uptrend |
+| Hidden Bullish | Price HL, MACD LL | BUY | Continuation in uptrend |
+| Hidden Bearish | Price LH, MACD HH | SELL | Continuation in downtrend |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Endpoints
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### POST /api/chat
 
-## Deploy on Vercel
+Sends messages to the AI assistant and returns a response.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Request:**
+```json
+{
+  "messages": [
+    { "role": "user", "content": "What is the best BTC setup?" }
+  ]
+}
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Response:**
+```json
+{
+  "reply": "The best BTC setup is..."
+}
+```
+
+## Disclaimer
+
+This application is for **educational purposes only**. Trading involves substantial risk of loss. Never risk more than 1-2% of your account per trade. Past performance does not guarantee future results.
+
+## License
+
+MIT
