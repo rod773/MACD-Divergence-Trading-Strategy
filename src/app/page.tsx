@@ -561,6 +561,15 @@ export default function Home() {
               const matchedSetup = divergenceSetups.find(
                 (s) => s.pair === div.pair && s.divergenceType === div.divergenceType && s.direction === div.direction
               );
+              let sl = matchedSetup?.stopLoss || 0;
+              let tp = matchedSetup?.takeProfit1 || 0;
+              const currentPrice = pairData.currentPrice;
+              if (matchedSetup && currentPrice > 0) {
+                const slDist = matchedSetup.stopLoss - matchedSetup.entry;
+                const tpDist = matchedSetup.takeProfit1 - matchedSetup.entry;
+                sl = currentPrice + slDist;
+                tp = currentPrice + tpDist;
+              }
               const newAlert = {
                 id: div.id,
                 pair: div.pair,
@@ -568,11 +577,11 @@ export default function Home() {
                 direction: div.direction,
                 time: now,
                 dismissed: false,
-                stopLoss: matchedSetup?.stopLoss || 0,
-                takeProfit: matchedSetup?.takeProfit1 || 0,
+                stopLoss: Math.round(sl * 100) / 100,
+                takeProfit: Math.round(tp * 100) / 100,
               };
               setAlerts((prev) => [newAlert, ...prev].slice(0, 20));
-              setPopupAlert({ pair: div.pair, type: div.divergenceType, direction: div.direction, stopLoss: matchedSetup?.stopLoss || 0, takeProfit: matchedSetup?.takeProfit1 || 0 });
+              setPopupAlert({ pair: div.pair, type: div.divergenceType, direction: div.direction, stopLoss: Math.round(sl * 100) / 100, takeProfit: Math.round(tp * 100) / 100 });
               setTimeout(() => setPopupAlert(null), 8000);
               break; // Only show one popup alert per fetch cycle
             }
