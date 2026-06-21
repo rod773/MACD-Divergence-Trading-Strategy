@@ -45,7 +45,7 @@ export async function fetchOHLCV(
   pair: string,
   timeframe: string
 ): Promise<OHLCV[]> {
-  if (pair === "BOLD") {
+  if (pair === "BOLD/USD") {
     const history = await fetchBoldHistory();
     if (!history || history.length === 0) {
       throw new Error("No BOLD data returned");
@@ -89,7 +89,7 @@ export async function fetchOHLCV(
 }
 
 export async function fetchCurrentPrice(pair: string): Promise<number> {
-  if (pair === "BOLD") {
+  if (pair === "BOLD/USD") {
     const res = await fetch("https://bold.report/api/v1/bold/performance-latest.json");
     if (!res.ok) throw new Error("Failed to fetch BOLD price");
     const data = await res.json();

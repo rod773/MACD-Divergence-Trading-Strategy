@@ -59,7 +59,7 @@ async function processPair(pair: string): Promise<MarketResponse> {
 
 export async function GET(_request: NextRequest) {
   try {
-    const pairs = ["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD", "BOLD"];
+    const pairs = ["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD", "BOLD/USD"];
 
     // Fetch all pairs in parallel
     const results = await Promise.all(pairs.map(processPair));

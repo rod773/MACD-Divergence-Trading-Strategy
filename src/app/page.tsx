@@ -74,7 +74,7 @@ interface DivergenceSetup {
   confirmation: string;
 }
 
-const PAIRS = ["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD", "BOLD"] as const;
+const PAIRS = ["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD", "BOLD/USD"] as const;
 
 const divergenceSetups: DivergenceSetup[] = [
   {
@@ -478,8 +478,8 @@ const divergenceSetups: DivergenceSetup[] = [
     confirmation: "Price rejected at resistance + MACD histogram turning negative",
   },
   {
-    id: "bold-bullish-reg",
-    pair: "BOLD",
+    id: "bold-usd-bullish-reg",
+    pair: "BOLD/USD",
     direction: "BUY",
     divergenceType: "Regular Bullish",
     entry: 2400,
@@ -503,8 +503,8 @@ const divergenceSetups: DivergenceSetup[] = [
     confirmation: "Wait for MACD bullish crossover + RSI divergence below 30",
   },
   {
-    id: "bold-bearish-reg",
-    pair: "BOLD",
+    id: "bold-usd-bearish-reg",
+    pair: "BOLD/USD",
     direction: "SELL",
     divergenceType: "Regular Bearish",
     entry: 2600,
@@ -528,8 +528,8 @@ const divergenceSetups: DivergenceSetup[] = [
     confirmation: "MACD bearish crossover + bearish engulfing + volume spike on drop",
   },
   {
-    id: "bold-hidden-bullish",
-    pair: "BOLD",
+    id: "bold-usd-hidden-bullish",
+    pair: "BOLD/USD",
     direction: "BUY",
     divergenceType: "Hidden Bullish",
     entry: 2350,
@@ -553,8 +553,8 @@ const divergenceSetups: DivergenceSetup[] = [
     confirmation: "Price holds above 50 EMA + MACD histogram turning positive",
   },
   {
-    id: "bold-hidden-bearish",
-    pair: "BOLD",
+    id: "bold-usd-hidden-bearish",
+    pair: "BOLD/USD",
     direction: "SELL",
     divergenceType: "Hidden Bearish",
     entry: 2600,
@@ -626,7 +626,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "trades" | "learn">(
     "dashboard"
   );
-  const [selectedPair, setSelectedPair] = useState<"AUD/USD" | "XAU/USD" | "ETH/USD" | "BTC/USD" | "BOLD">("AUD/USD");
+  const [selectedPair, setSelectedPair] = useState<"AUD/USD" | "XAU/USD" | "ETH/USD" | "BTC/USD" | "BOLD/USD">("AUD/USD");
   const [selectedType, setSelectedType] = useState<string>("ALL");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [animatedPrices, setAnimatedPrices] = useState<Record<string, number>>({});
@@ -716,7 +716,7 @@ export default function Home() {
           } else if (!prev[pair]) {
             next[pair] = getInitialPrice(pair);
           } else {
-            const volatility = pair === "BOLD" ? 5 : pair.includes("XAU") ? 2 : pair.includes("BTC") ? 50 : pair.includes("ETH") ? 2 : 0.0003;
+            const volatility = pair === "BOLD/USD" ? 5 : pair.includes("XAU") ? 2 : pair.includes("BTC") ? 50 : pair.includes("ETH") ? 2 : 0.0003;
             const change = (Math.random() - 0.5) * volatility;
             next[pair] = Math.max(0, (prev[pair] || 0) + change);
           }
@@ -822,7 +822,7 @@ export default function Home() {
 
             <div className="flex items-center gap-2">
               <div className="flex bg-white/5 rounded-md p-0.5 border border-white/5 overflow-x-auto max-w-[200px] sm:max-w-none">
-                {(["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD", "BOLD"] as const).map((pair) => (
+                {(["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD", "BOLD/USD"] as const).map((pair) => (
                   <button
                     key={pair}
                     onClick={() => setSelectedPair(pair)}
@@ -830,7 +830,7 @@ export default function Home() {
                       selectedPair === pair
                         ? "bg-white/15 text-white"
                         : "text-slate-500 hover:text-slate-300"
-                    } ${pair === "BOLD" ? "font-bold" : ""}`}
+                    } ${pair === "BOLD/USD" ? "font-bold" : ""}`}
                   >
                     {pair}
                   </button>
@@ -1191,7 +1191,7 @@ export default function Home() {
                         </div>
                       </div>
                     </>
-                  ) : selectedPair === "BOLD" ? (
+                  ) : selectedPair === "BOLD/USD" ? (
                     <>
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
@@ -1199,7 +1199,7 @@ export default function Home() {
                               <span className="text-lg font-bold">B</span>
                             </div>
                             <div>
-                              <h3 className="font-semibold text-sm">BOLD</h3>
+                              <h3 className="font-semibold text-sm">BOLD/USD</h3>
                               <p className="text-xs text-slate-500">BTC/Gold Vol Index</p>
                             </div>
                           </div>
@@ -1211,7 +1211,7 @@ export default function Home() {
                           </div>
                         </div>
                         <div className="flex items-baseline gap-3 mb-3">
-                          <span className="text-2xl font-bold tabular-nums">{liveData["BOLD"]?.currentPrice?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || animatedPrices["BOLD"]?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "2,440.57"}</span>
+                          <span className="text-2xl font-bold tabular-nums">{liveData["BOLD/USD"]?.currentPrice?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || animatedPrices["BOLD/USD"]?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "2,440.57"}</span>
                           <span className="text-xs text-emerald-400 flex items-center gap-1">
                             <ArrowUpRight className="w-3 h-3" /> +0.85%
                           </span>
