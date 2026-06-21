@@ -16,6 +16,7 @@ const PAIR_TICKERS: Record<string, string> = {
   "XAU/USD": "GC=F",
   "ETH/USD": "ETH-USD",
   "BTC/USD": "BTC-USD",
+  "BOLD/USD": "BOLD-USD",
 };
 
 const TIMEFRAME_CONFIG: Record<string, { period1: string; period2: string }> = {
@@ -45,7 +46,7 @@ export async function fetchOHLCV(
   pair: string,
   timeframe: string
 ): Promise<OHLCV[]> {
-  if (pair === "BOLD/USD") {
+  if (pair === "BOLD") {
     const history = await fetchBoldHistory();
     if (!history || history.length === 0) {
       throw new Error("No BOLD data returned");
@@ -89,7 +90,7 @@ export async function fetchOHLCV(
 }
 
 export async function fetchCurrentPrice(pair: string): Promise<number> {
-  if (pair === "BOLD/USD") {
+  if (pair === "BOLD") {
     const res = await fetch("https://bold.report/api/v1/bold/performance-latest.json");
     if (!res.ok) throw new Error("Failed to fetch BOLD price");
     const data = await res.json();

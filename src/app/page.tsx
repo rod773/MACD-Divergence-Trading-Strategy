@@ -74,7 +74,7 @@ interface DivergenceSetup {
   confirmation: string;
 }
 
-const PAIRS = ["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD", "BOLD/USD"] as const;
+const PAIRS = ["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD", "BOLD", "BOLD/USD"] as const;
 
 const divergenceSetups: DivergenceSetup[] = [
   {
@@ -478,8 +478,8 @@ const divergenceSetups: DivergenceSetup[] = [
     confirmation: "Price rejected at resistance + MACD histogram turning negative",
   },
   {
-    id: "bold-usd-bullish-reg",
-    pair: "BOLD/USD",
+    id: "bold-bullish-reg",
+    pair: "BOLD",
     direction: "BUY",
     divergenceType: "Regular Bullish",
     entry: 2400,
@@ -503,8 +503,8 @@ const divergenceSetups: DivergenceSetup[] = [
     confirmation: "Wait for MACD bullish crossover + RSI divergence below 30",
   },
   {
-    id: "bold-usd-bearish-reg",
-    pair: "BOLD/USD",
+    id: "bold-bearish-reg",
+    pair: "BOLD",
     direction: "SELL",
     divergenceType: "Regular Bearish",
     entry: 2600,
@@ -528,8 +528,8 @@ const divergenceSetups: DivergenceSetup[] = [
     confirmation: "MACD bearish crossover + bearish engulfing + volume spike on drop",
   },
   {
-    id: "bold-usd-hidden-bullish",
-    pair: "BOLD/USD",
+    id: "bold-hidden-bullish",
+    pair: "BOLD",
     direction: "BUY",
     divergenceType: "Hidden Bullish",
     entry: 2350,
@@ -553,8 +553,8 @@ const divergenceSetups: DivergenceSetup[] = [
     confirmation: "Price holds above 50 EMA + MACD histogram turning positive",
   },
   {
-    id: "bold-usd-hidden-bearish",
-    pair: "BOLD/USD",
+    id: "bold-hidden-bearish",
+    pair: "BOLD",
     direction: "SELL",
     divergenceType: "Hidden Bearish",
     entry: 2600,
@@ -576,6 +576,106 @@ const divergenceSetups: DivergenceSetup[] = [
     priceAction: "Price: Lower High at 2600 (below 2700 previous high)",
     macdBehavior: "MACD: Higher High = Hidden Bearish (continuation in downtrend)",
     confirmation: "Price rejected at 2600 + MACD histogram turning negative",
+  },
+  {
+    id: "bold-usd-bullish-reg",
+    pair: "BOLD/USD",
+    direction: "BUY",
+    divergenceType: "Regular Bullish",
+    entry: 0.9980,
+    stopLoss: 0.9950,
+    takeProfit1: 1.0010,
+    takeProfit2: 1.0050,
+    currentPrice: 0.9982,
+    confidence: "LOW",
+    timeframe: "4H / Daily",
+    trend: "Downtrend",
+    trendContext: "Reversal in downtrend",
+    signalMeaning: "Reversal",
+    probability: 45,
+    winRate: "45%",
+    expectedReturn: "+3 pts",
+    riskAmount: "3 pts (0.3%)",
+    analysis:
+      "BOLD stablecoin slightly below peg. Minimal divergence expected for stablecoin — monitor for depeg risk.",
+    priceAction: "Price: Slight depeg at 0.9982",
+    macdBehavior: "MACD: Watch for bullish momentum recovery",
+    confirmation: "Price returns to $1.00 peg + volume increase",
+  },
+  {
+    id: "bold-usd-bearish-reg",
+    pair: "BOLD/USD",
+    direction: "SELL",
+    divergenceType: "Regular Bearish",
+    entry: 1.0020,
+    stopLoss: 1.0050,
+    takeProfit1: 0.9980,
+    takeProfit2: 0.9950,
+    currentPrice: 0.9982,
+    confidence: "LOW",
+    timeframe: "4H / Daily",
+    trend: "Uptrend",
+    trendContext: "Reversal in uptrend",
+    signalMeaning: "Reversal",
+    probability: 45,
+    winRate: "45%",
+    expectedReturn: "+4 pts",
+    riskAmount: "3 pts (0.3%)",
+    analysis:
+      "BOLD stablecoin above peg. Watch for potential depegging if liquidity conditions change.",
+    priceAction: "Price: Above peg at 1.0020",
+    macdBehavior: "MACD: Watch for bearish momentum",
+    confirmation: "Price drops below $1.00 + increased redemption volume",
+  },
+  {
+    id: "bold-usd-hidden-bullish",
+    pair: "BOLD/USD",
+    direction: "BUY",
+    divergenceType: "Hidden Bullish",
+    entry: 0.9970,
+    stopLoss: 0.9940,
+    takeProfit1: 1.0000,
+    takeProfit2: 1.0030,
+    currentPrice: 0.9982,
+    confidence: "LOW",
+    timeframe: "1H / 4H",
+    trend: "Uptrend",
+    trendContext: "Continuation in uptrend",
+    signalMeaning: "Continuation",
+    probability: 48,
+    winRate: "48%",
+    expectedReturn: "+3 pts",
+    riskAmount: "3 pts (0.3%)",
+    analysis:
+      "If BOLD dips to 0.9970 and stabilizes, hidden bullish divergence confirms return to peg.",
+    priceAction: "Price: Higher Low at 0.9970",
+    macdBehavior: "MACD: Lower Low = Hidden Bullish",
+    confirmation: "Price holds above 0.9970 + MACD turning positive",
+  },
+  {
+    id: "bold-usd-hidden-bearish",
+    pair: "BOLD/USD",
+    direction: "SELL",
+    divergenceType: "Hidden Bearish",
+    entry: 1.0030,
+    stopLoss: 1.0060,
+    takeProfit1: 0.9980,
+    takeProfit2: 0.9950,
+    currentPrice: 0.9982,
+    confidence: "LOW",
+    timeframe: "1H / 4H",
+    trend: "Downtrend",
+    trendContext: "Continuation in downtrend",
+    signalMeaning: "Continuation",
+    probability: 48,
+    winRate: "48%",
+    expectedReturn: "+5 pts",
+    riskAmount: "3 pts (0.3%)",
+    analysis:
+      "If BOLD spikes to 1.0030 and fades, hidden bearish divergence confirms continued depeg pressure.",
+    priceAction: "Price: Lower High at 1.0030",
+    macdBehavior: "MACD: Higher High = Hidden Bearish",
+    confirmation: "Price rejected at 1.0030 + MACD turning negative",
   },
 ];
 
@@ -626,7 +726,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "trades" | "learn">(
     "dashboard"
   );
-  const [selectedPair, setSelectedPair] = useState<"AUD/USD" | "XAU/USD" | "ETH/USD" | "BTC/USD" | "BOLD/USD">("AUD/USD");
+  const [selectedPair, setSelectedPair] = useState<"AUD/USD" | "XAU/USD" | "ETH/USD" | "BTC/USD" | "BOLD" | "BOLD/USD">("AUD/USD");
   const [selectedType, setSelectedType] = useState<string>("ALL");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [animatedPrices, setAnimatedPrices] = useState<Record<string, number>>({});
@@ -716,7 +816,7 @@ export default function Home() {
           } else if (!prev[pair]) {
             next[pair] = getInitialPrice(pair);
           } else {
-            const volatility = pair === "BOLD/USD" ? 5 : pair.includes("XAU") ? 2 : pair.includes("BTC") ? 50 : pair.includes("ETH") ? 2 : 0.0003;
+            const volatility = pair === "BOLD" ? 5 : pair === "BOLD/USD" ? 0.0003 : pair.includes("XAU") ? 2 : pair.includes("BTC") ? 50 : pair.includes("ETH") ? 2 : 0.0003;
             const change = (Math.random() - 0.5) * volatility;
             next[pair] = Math.max(0, (prev[pair] || 0) + change);
           }
@@ -822,7 +922,7 @@ export default function Home() {
 
             <div className="flex items-center gap-2">
               <div className="flex bg-white/5 rounded-md p-0.5 border border-white/5 overflow-x-auto max-w-[200px] sm:max-w-none">
-                {(["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD", "BOLD/USD"] as const).map((pair) => (
+                {(["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD", "BOLD", "BOLD/USD"] as const).map((pair) => (
                   <button
                     key={pair}
                     onClick={() => setSelectedPair(pair)}
@@ -830,7 +930,7 @@ export default function Home() {
                       selectedPair === pair
                         ? "bg-white/15 text-white"
                         : "text-slate-500 hover:text-slate-300"
-                    } ${pair === "BOLD/USD" ? "font-bold" : ""}`}
+                    } ${pair === "BOLD" ? "font-bold" : ""}`}
                   >
                     {pair}
                   </button>
@@ -1191,7 +1291,7 @@ export default function Home() {
                         </div>
                       </div>
                     </>
-                  ) : selectedPair === "BOLD/USD" ? (
+                  ) : selectedPair === "BOLD" ? (
                     <>
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
@@ -1199,7 +1299,7 @@ export default function Home() {
                               <span className="text-lg font-bold">B</span>
                             </div>
                             <div>
-                              <h3 className="font-semibold text-sm">BOLD/USD</h3>
+                              <h3 className="font-semibold text-sm">BOLD</h3>
                               <p className="text-xs text-slate-500">BTC/Gold Vol Index</p>
                             </div>
                           </div>
@@ -1211,7 +1311,7 @@ export default function Home() {
                           </div>
                         </div>
                         <div className="flex items-baseline gap-3 mb-3">
-                          <span className="text-2xl font-bold tabular-nums">{liveData["BOLD/USD"]?.currentPrice?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || animatedPrices["BOLD/USD"]?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "2,440.57"}</span>
+                          <span className="text-2xl font-bold tabular-nums">{liveData["BOLD"]?.currentPrice?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || animatedPrices["BOLD"]?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "2,440.57"}</span>
                           <span className="text-xs text-emerald-400 flex items-center gap-1">
                             <ArrowUpRight className="w-3 h-3" /> +0.85%
                           </span>
@@ -1228,6 +1328,46 @@ export default function Home() {
                           <div>
                             <p className="text-sm uppercase tracking-wider text-slate-600">Rebalance</p>
                             <p className="text-sm font-medium">Monthly</p>
+                          </div>
+                        </div>
+                    </>
+                  ) : selectedPair === "BOLD/USD" ? (
+                    <>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400/20 to-cyan-500/20 flex items-center justify-center border border-white/5">
+                              <span className="text-lg font-bold">B</span>
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-sm">BOLD/USD</h3>
+                              <p className="text-xs text-slate-500">Liquity BOLD</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {isLoadingData && <RefreshCw className="w-3 h-3 text-slate-500 animate-spin" />}
+                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                              Hold
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-baseline gap-3 mb-3">
+                          <span className="text-2xl font-bold tabular-nums">${liveData["BOLD/USD"]?.currentPrice?.toFixed(4) || animatedPrices["BOLD/USD"]?.toFixed(4) || "0.9982"}</span>
+                          <span className="text-xs text-slate-400 flex items-center gap-1">
+                            Stablecoin
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-3 pt-3 border-t border-white/5">
+                          <div>
+                            <p className="text-sm uppercase tracking-wider text-slate-600">Peg</p>
+                            <p className="text-sm font-medium tabular-nums">$1.00</p>
+                          </div>
+                          <div>
+                            <p className="text-sm uppercase tracking-wider text-slate-600">52W Range</p>
+                            <p className="text-sm font-medium tabular-nums">0.96 - 1.01</p>
+                          </div>
+                          <div>
+                            <p className="text-sm uppercase tracking-wider text-slate-600">Market Cap</p>
+                            <p className="text-sm font-medium">$31.8M</p>
                           </div>
                         </div>
                     </>
