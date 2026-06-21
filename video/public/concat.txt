@@ -1,0 +1,7 @@
+file 'intro.wav'
+file 'what_is.wav'
+file 'bullish.wav'
+file 'bearish.wav'
+file 'hidden_bullish.wav'
+file 'hidden_bearish.wav'
+file 'outro.wav'
