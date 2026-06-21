@@ -134,6 +134,22 @@ Hidden divergences achieved 100% win rate (10/10). Regular Bearish was weakest a
 ├── backtest.py                   # Python backtest engine
 ├── backtest_results.png          # Backtest equity curve
 └── video/                        # Remotion video project
+
+### Backtest Results (AAPL 2Y)
+
+![MACD Divergence Backtest](backtest_results.png)
+
+| Metric | Value |
+|---|---|
+| Return | +153.64% |
+| Sharpe | 2.22 |
+| Max Drawdown | 6.94% |
+| Win Rate | 76.2% (16/21) |
+| Profit Factor | 6.45 |
+| Avg Bars Held | 9.0 |
+
+Hidden divergences achieved 100% win rate (10/10). Regular Bearish was weakest at 43%.
+
 ```
 
 ## Tech Stack
