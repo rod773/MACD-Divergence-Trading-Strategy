@@ -74,7 +74,7 @@ interface DivergenceSetup {
   confirmation: string;
 }
 
-const PAIRS = ["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD"] as const;
+const PAIRS = ["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD", "BOLD"] as const;
 
 const divergenceSetups: DivergenceSetup[] = [
   {
@@ -477,6 +477,106 @@ const divergenceSetups: DivergenceSetup[] = [
     macdBehavior: "MACD: Higher High = Hidden Bearish Divergence (continuation signal)",
     confirmation: "Price rejected at resistance + MACD histogram turning negative",
   },
+  {
+    id: "bold-bullish-reg",
+    pair: "BOLD",
+    direction: "BUY",
+    divergenceType: "Regular Bullish",
+    entry: 2400,
+    stopLoss: 2300,
+    takeProfit1: 2600,
+    takeProfit2: 2800,
+    currentPrice: 2440.57,
+    confidence: "MEDIUM",
+    timeframe: "4H / Daily",
+    trend: "Downtrend",
+    trendContext: "Reversal in downtrend",
+    signalMeaning: "Reversal",
+    probability: 58,
+    winRate: "58%",
+    expectedReturn: "+200 pts",
+    riskAmount: "100 pts (4.1%)",
+    analysis:
+      "BOLD volatility-weighted index showing potential bullish divergence. Inverse volatility rebalancing favors gold-heavy positioning. Expect mean reversion.",
+    priceAction: "Price: Potential Lower Low at 2400 support zone",
+    macdBehavior: "MACD: Watch for Higher Low = Regular Bullish Divergence",
+    confirmation: "Wait for MACD bullish crossover + RSI divergence below 30",
+  },
+  {
+    id: "bold-bearish-reg",
+    pair: "BOLD",
+    direction: "SELL",
+    divergenceType: "Regular Bearish",
+    entry: 2600,
+    stopLoss: 2700,
+    takeProfit1: 2400,
+    takeProfit2: 2200,
+    currentPrice: 2440.57,
+    confidence: "MEDIUM",
+    timeframe: "4H / Daily",
+    trend: "Uptrend",
+    trendContext: "Reversal in uptrend",
+    signalMeaning: "Reversal",
+    probability: 62,
+    winRate: "62%",
+    expectedReturn: "+200 pts",
+    riskAmount: "100 pts (3.8%)",
+    analysis:
+      "BOLD rising with weakening MACD momentum. Bearish divergence forming at resistance. BTC volatility spike may trigger rebalance toward gold weighting.",
+    priceAction: "Price: Higher High at 2600 with rejection candle",
+    macdBehavior: "MACD: Lower High = Regular Bearish Divergence confirmed",
+    confirmation: "MACD bearish crossover + bearish engulfing + volume spike on drop",
+  },
+  {
+    id: "bold-hidden-bullish",
+    pair: "BOLD",
+    direction: "BUY",
+    divergenceType: "Hidden Bullish",
+    entry: 2350,
+    stopLoss: 2250,
+    takeProfit1: 2550,
+    takeProfit2: 2750,
+    currentPrice: 2440.57,
+    confidence: "MEDIUM",
+    timeframe: "1H / 4H",
+    trend: "Uptrend",
+    trendContext: "Continuation in uptrend",
+    signalMeaning: "Continuation",
+    probability: 60,
+    winRate: "60%",
+    expectedReturn: "+200 pts",
+    riskAmount: "100 pts (4.3%)",
+    analysis:
+      "If BOLD pulls back to 2350 and makes higher low while MACD makes lower low, hidden bullish divergence confirms uptrend continuation. Volatility-weighted rebalancing supports stability.",
+    priceAction: "Price: Higher Low forming at 2350 (above 2250 previous low)",
+    macdBehavior: "MACD: Lower Low = Hidden Bullish (continuation in uptrend)",
+    confirmation: "Price holds above 50 EMA + MACD histogram turning positive",
+  },
+  {
+    id: "bold-hidden-bearish",
+    pair: "BOLD",
+    direction: "SELL",
+    divergenceType: "Hidden Bearish",
+    entry: 2600,
+    stopLoss: 2700,
+    takeProfit1: 2400,
+    takeProfit2: 2200,
+    currentPrice: 2440.57,
+    confidence: "MEDIUM",
+    timeframe: "1H / 4H",
+    trend: "Downtrend",
+    trendContext: "Continuation in downtrend",
+    signalMeaning: "Continuation",
+    probability: 64,
+    winRate: "64%",
+    expectedReturn: "+200 pts",
+    riskAmount: "100 pts (3.8%)",
+    analysis:
+      "If BOLD bounces to 2600 and makes lower high while MACD makes higher high, hidden bearish divergence confirms downtrend continuation. Monthly rebalance may accelerate decline.",
+    priceAction: "Price: Lower High at 2600 (below 2700 previous high)",
+    macdBehavior: "MACD: Higher High = Hidden Bearish (continuation in downtrend)",
+    confirmation: "Price rejected at 2600 + MACD histogram turning negative",
+  },
 ];
 
 const divergenceGuide = [
@@ -526,7 +626,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "trades" | "learn">(
     "dashboard"
   );
-  const [selectedPair, setSelectedPair] = useState<"AUD/USD" | "XAU/USD" | "ETH/USD" | "BTC/USD">("AUD/USD");
+  const [selectedPair, setSelectedPair] = useState<"AUD/USD" | "XAU/USD" | "ETH/USD" | "BTC/USD" | "BOLD">("AUD/USD");
   const [selectedType, setSelectedType] = useState<string>("ALL");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [animatedPrices, setAnimatedPrices] = useState<Record<string, number>>({});
@@ -616,7 +716,7 @@ export default function Home() {
           } else if (!prev[pair]) {
             next[pair] = getInitialPrice(pair);
           } else {
-            const volatility = pair.includes("XAU") ? 2 : pair.includes("BTC") ? 50 : pair.includes("ETH") ? 2 : 0.0003;
+            const volatility = pair === "BOLD" ? 5 : pair.includes("XAU") ? 2 : pair.includes("BTC") ? 50 : pair.includes("ETH") ? 2 : 0.0003;
             const change = (Math.random() - 0.5) * volatility;
             next[pair] = Math.max(0, (prev[pair] || 0) + change);
           }
@@ -722,7 +822,7 @@ export default function Home() {
 
             <div className="flex items-center gap-2">
               <div className="flex bg-white/5 rounded-md p-0.5 border border-white/5 overflow-x-auto max-w-[200px] sm:max-w-none">
-                {(["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD"] as const).map((pair) => (
+                {(["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD", "BOLD"] as const).map((pair) => (
                   <button
                     key={pair}
                     onClick={() => setSelectedPair(pair)}
@@ -730,7 +830,7 @@ export default function Home() {
                       selectedPair === pair
                         ? "bg-white/15 text-white"
                         : "text-slate-500 hover:text-slate-300"
-                    }`}
+                    } ${pair === "BOLD" ? "font-bold" : ""}`}
                   >
                     {pair}
                   </button>
@@ -1090,6 +1190,46 @@ export default function Home() {
                           <p className="text-sm font-medium">18.2B</p>
                         </div>
                       </div>
+                    </>
+                  ) : selectedPair === "BOLD" ? (
+                    <>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-400/20 to-amber-500/20 flex items-center justify-center border border-white/5">
+                              <span className="text-lg font-bold">B</span>
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-sm">BOLD</h3>
+                              <p className="text-xs text-slate-500">BTC/Gold Vol Index</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {isLoadingData && <RefreshCw className="w-3 h-3 text-slate-500 animate-spin" />}
+                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                              Buy
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-baseline gap-3 mb-3">
+                          <span className="text-2xl font-bold tabular-nums">{liveData["BOLD"]?.currentPrice?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || animatedPrices["BOLD"]?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "2,440.57"}</span>
+                          <span className="text-xs text-emerald-400 flex items-center gap-1">
+                            <ArrowUpRight className="w-3 h-3" /> +0.85%
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-3 pt-3 border-t border-white/5">
+                          <div>
+                            <p className="text-sm uppercase tracking-wider text-slate-600">Gold Weight</p>
+                            <p className="text-sm font-medium tabular-nums">~57%</p>
+                          </div>
+                          <div>
+                            <p className="text-sm uppercase tracking-wider text-slate-600">BTC Weight</p>
+                            <p className="text-sm font-medium tabular-nums">~43%</p>
+                          </div>
+                          <div>
+                            <p className="text-sm uppercase tracking-wider text-slate-600">Rebalance</p>
+                            <p className="text-sm font-medium">Monthly</p>
+                          </div>
+                        </div>
                     </>
                   ) : (
                     <>

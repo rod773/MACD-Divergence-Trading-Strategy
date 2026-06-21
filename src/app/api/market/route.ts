@@ -14,30 +14,35 @@ async function processPair(pair: string): Promise<MarketResponse> {
   try {
     const currentPrice = await fetchCurrentPrice(pair);
 
-    // Fetch data for both timeframes
-    const dailyData = await fetchOHLCV(pair, "4H / Daily");
-    const hourlyData = await fetchOHLCV(pair, "1H / 4H");
+    let divergences: DetectedDivergence[] = [];
+    try {
+      // Fetch data for both timeframes
+      const dailyData = await fetchOHLCV(pair, "4H / Daily");
+      const hourlyData = await fetchOHLCV(pair, "1H / 4H");
 
-    // Calculate MACD for both
-    const dailyCloses = dailyData.map((d) => d.close);
-    const hourlyCloses = hourlyData.map((d) => d.close);
+      // Calculate MACD for both
+      const dailyCloses = dailyData.map((d) => d.close);
+      const hourlyCloses = hourlyData.map((d) => d.close);
 
-    const dailyMACD = calculateMACD(dailyCloses);
-    const hourlyMACD = calculateMACD(hourlyCloses);
+      const dailyMACD = calculateMACD(dailyCloses);
+      const hourlyMACD = calculateMACD(hourlyCloses);
 
-    // Detect divergences on both timeframes
-    const dailyDivergences = detectDivergences(dailyData, dailyMACD, pair, "4H / Daily");
-    const hourlyDivergences = detectDivergences(hourlyData, hourlyMACD, pair, "1H / 4H");
+      // Detect divergences on both timeframes
+      const dailyDivergences = detectDivergences(dailyData, dailyMACD, pair, "4H / Daily");
+      const hourlyDivergences = detectDivergences(hourlyData, hourlyMACD, pair, "1H / 4H");
 
-    // Combine and take only the most recent divergences
-    const allDivergences = [...dailyDivergences, ...hourlyDivergences]
-      .sort((a, b) => b.detectedAt.getTime() - a.detectedAt.getTime())
-      .slice(0, 4); // Max 4 per pair
+      // Combine and take only the most recent divergences
+      divergences = [...dailyDivergences, ...hourlyDivergences]
+        .sort((a, b) => b.detectedAt.getTime() - a.detectedAt.getTime())
+        .slice(0, 4);
+    } catch {
+      // OHLCV/divergence failure is non-fatal — still return the price
+    }
 
     return {
       pair,
       currentPrice,
-      divergences: allDivergences,
+      divergences,
       lastUpdated: new Date().toISOString(),
     };
   } catch (error) {
@@ -54,7 +59,7 @@ async function processPair(pair: string): Promise<MarketResponse> {
 
 export async function GET(_request: NextRequest) {
   try {
-    const pairs = ["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD"];
+    const pairs = ["AUD/USD", "XAU/USD", "ETH/USD", "BTC/USD", "BOLD"];
 
     // Fetch all pairs in parallel
     const results = await Promise.all(pairs.map(processPair));
