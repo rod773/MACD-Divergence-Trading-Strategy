@@ -1,6 +1,28 @@
-Build a Next.js web application called "MACD Divergence Trading Strategy" — a professional technical analysis dashboard that identifies and displays MACD divergence patterns across multiple financial instruments, with an AI-powered chat assistant for trade analysis.
+Build a multi-platform MACD Divergence Trading Strategy system — a Next.js web dashboard, Pine Script indicator, MQ5 indicator & Expert Advisor, and Python indicator with backtester.
 
-## Tech Stack
+## Core Algorithm (shared across all platforms)
+
+Detects 4 divergence types between price and MACD using swing-point analysis:
+
+| Type | Price Pattern | MACD Pattern | Signal | Context |
+|------|--------------|--------------|--------|---------|
+| Regular Bullish | Lower Low | Higher Low | BUY | Reversal in downtrend |
+| Regular Bearish | Higher High | Lower High | SELL | Reversal in uptrend |
+| Hidden Bullish | Higher Low | Lower Low | BUY | Continuation in uptrend |
+| Hidden Bearish | Lower High | Higher High | SELL | Continuation in downtrend |
+
+**Detection steps:**
+1. Calculate MACD: Fast EMA (12) - Slow EMA (26), Signal EMA (9)
+2. Find swing highs/lows on price and MACD — a bar is a swing high if strictly higher than all neighbors within lookback (default: 5 bars)
+3. Track last two swing highs and lows for both price and MACD
+4. Compare consecutive swings — if price makes new extreme but MACD doesn't confirm, it's a divergence
+5. Draw connecting lines on MACD panel between the two swing points, with labels
+
+---
+
+## Platform 1: Next.js Web Dashboard
+
+### Tech Stack
 - Next.js 16 (App Router)
 - TypeScript
 - Tailwind CSS v4 with shadcn/ui components
@@ -9,13 +31,11 @@ Build a Next.js web application called "MACD Divergence Trading Strategy" — a 
 - Axios for HTTP requests
 - Google Fonts: Geist Sans and Geist Mono
 
-## Theme
-Dark trading dashboard with a deep navy/black background (#020617). All panels use #0E1223 with subtle white/5 borders. Primary accent colors: emerald (bullish), rose (bearish), cyan (hidden bullish), orange (hidden bearish), blue (AI chat).
+### Theme
+Dark trading dashboard with deep navy/black background (#020617). All panels use #0E1223 with subtle white/5 borders. Primary accent colors: emerald (bullish), rose (bearish), cyan (hidden bullish), orange (hidden bearish), blue (AI chat).
 
-## Pages
+### Pages
 Single-page application with 3 tabs: Dashboard, Trade Setups, and Divergence Guide. Tab switching via animated transitions. Mobile has a fixed bottom navigation bar.
-
-## Features
 
 ### Top Navigation Bar
 - Sticky header with logo (SVG waveform icon), app title "MACD Divergence Pro", tab navigation, and pair selector
@@ -24,14 +44,14 @@ Single-page application with 3 tabs: Dashboard, Trade Setups, and Divergence Gui
 - Bell icon for notifications
 
 ### Dashboard Tab
-- 4 summary cards showing counts for each divergence type (Regular Bullish, Regular Bearish, Hidden Bullish, Hidden Bearish) with average probability percentages
+- 4 summary cards showing counts for each divergence type with average probability percentages
 - A full-width "Ask AI Assistant" button that opens the chat widget
 - Price overview panel for the selected pair showing:
   - Pair icon and name with a signal badge (Strong Sell/Sell/Buy)
   - Current price with percentage change
   - Day range, 52-week range, RSI or Volume
   - Animated price ticker that simulates small price movements every 2 seconds
-- All Divergence Signals grid showing each active setup as a clickable row with: direction icon, pair name, divergence type badge, probability, and target price. Clicking navigates to Trade Setups tab.
+- All Divergence Signals grid showing each active setup as a clickable row
 
 ### Trade Setups Tab
 - Filter bar with buttons: All Types, Regular Bullish, Regular Bearish, Hidden Bullish, Hidden Bearish
@@ -42,136 +62,227 @@ Single-page application with 3 tabs: Dashboard, Trade Setups, and Divergence Gui
   - 3 info boxes: Price Action, MACD Behavior, Confirmation criteria
   - Win Probability bar with percentage
   - Win Rate, Expected Return, Risk Amount stats
-  - Trade Levels grid: Entry, Stop Loss, TP1, TP2, R:R ratio (calculated as |TP - Entry| / |SL - Entry|)
-  - Risk bar: a horizontal bar split between red (SL distance) and green (TP distance)
+  - Trade Levels grid: Entry, Stop Loss, TP1, TP2, R:R ratio
+  - Risk bar: horizontal bar split between red (SL distance) and green (TP distance)
 - Risk Disclaimer banner at the bottom
 
 ### Divergence Guide Tab
 - "MACD Divergence Masterclass" header
 - Key Difference section comparing Regular (reversal) vs Hidden (continuation)
-- 4 cards for each divergence type, each containing:
-  - Icon and name with reliability rating
-  - SVG mini-chart showing the pattern (price line on top, MACD line on bottom, with labeled peaks/troughs)
-  - Description and signal
-- Visual Pattern Reference: larger SVG diagrams showing Regular Bullish, Regular Bearish, Hidden Bullish, Hidden Bearish with price/MACD lines, labeled LL/HL/HH/LH points, and signal arrows
-- Trading Rules grid: 6 rules (Regular=Reversal, Hidden=Continuation, Higher TF=Stronger, Wait for MACD Cross, Volume Confirmation, Risk:Reward 1:2+)
+- 4 cards for each divergence type with SVG mini-charts
+- Visual Pattern Reference with larger SVG diagrams
+- Trading Rules grid: 6 rules
 
-## Divergence Data (16 total setups across 4 pairs)
+### Divergence Data (16 total setups across 4 pairs)
 
-### AUD/USD (current price ~0.7013)
+#### AUD/USD (current price ~0.7013)
 - Regular Bullish: Entry 0.6940, SL 0.6890, TP1 0.7020, TP2 0.7100, Win Rate 62%, Confidence MEDIUM
 - Regular Bearish: Entry 0.7020, SL 0.7065, TP1 0.6950, TP2 0.6880, Win Rate 74%, Confidence HIGH
 - Hidden Bullish: Entry 0.6960, SL 0.6910, TP1 0.7040, TP2 0.7120, Win Rate 71%, Confidence HIGH
 - Hidden Bearish: Entry 0.7030, SL 0.7075, TP1 0.6960, TP2 0.6900, Win Rate 68%, Confidence MEDIUM
 
-### XAU/USD Gold (current price ~$4,172.90)
+#### XAU/USD Gold (current price ~$4,172.90)
 - Regular Bullish: Entry 4100, SL 4050, TP1 4200, TP2 4300, Win Rate 58%, Confidence MEDIUM
 - Regular Bearish: Entry 4200, SL 4260, TP1 4100, TP2 4000, Win Rate 72%, Confidence HIGH
 - Hidden Bullish: Entry 4120, SL 4070, TP1 4220, TP2 4320, Win Rate 65%, Confidence MEDIUM
 - Hidden Bearish: Entry 4200, SL 4255, TP1 4100, TP2 4000, Win Rate 70%, Confidence HIGH
 
-### ETH/USD (current price ~$3,512)
+#### ETH/USD (current price ~$3,512)
 - Regular Bullish: Entry 3450, SL 3350, TP1 3650, TP2 3850, Win Rate 67%, Confidence HIGH
 - Regular Bearish: Entry 3650, SL 3750, TP1 3450, TP2 3250, Win Rate 63%, Confidence MEDIUM
 - Hidden Bullish: Entry 3480, SL 3380, TP1 3680, TP2 3880, Win Rate 64%, Confidence MEDIUM
 - Hidden Bearish: Entry 3580, SL 3680, TP1 3380, TP2 3180, Win Rate 58%, Confidence LOW
 
-### BTC/USD (current price ~$104,850)
+#### BTC/USD (current price ~$104,850)
 - Regular Bullish: Entry 103500, SL 101500, TP1 107500, TP2 111500, Win Rate 70%, Confidence HIGH
 - Regular Bearish: Entry 108000, SL 110000, TP1 104000, TP2 100000, Win Rate 65%, Confidence MEDIUM
 - Hidden Bullish: Entry 104000, SL 102000, TP1 108000, TP2 112000, Win Rate 68%, Confidence HIGH
 - Hidden Bearish: Entry 106500, SL 108500, TP1 102500, TP2 98500, Win Rate 62%, Confidence MEDIUM
 
-Each setup must include:
-- A detailed analysis paragraph explaining the divergence logic
-- Price Action description (e.g., "Price: Lower Low at 103,500 support zone")
-- MACD Behavior description (e.g., "MACD: Higher Low while price makes Lower Low = Bullish Divergence")
-- Confirmation criteria (e.g., "Wait for MACD bullish crossover + high volume reversal candle")
-- Win probability percentage
-- Win Rate, Expected Return (in pips/points), Risk Amount (in pips/points and percentage)
-- Timeframe (1H/4H/Daily)
-- Trend context (Uptrend/Downtrend)
-- Signal meaning (Reversal/Continuation)
+### AI Chat Assistant
 
-## AI Chat Assistant
-### Frontend (ai-chat.tsx)
+#### Frontend (ai-chat.tsx)
 - Floating blue/cyan gradient button fixed to bottom-right corner, toggles chat open/close
 - Animated transitions using Framer Motion (scale, rotate, opacity)
-- Chat panel: full-screen on mobile, 800x500px floating panel on desktop with rounded corners
-- Header with bot icon, "MACD AI Assistant" title, green "Online" status indicator, and Sparkles icon
-- Message list with user messages on right (blue) and AI messages on left (gray) with bot/user icons
-- Auto-scroll to bottom on new messages
-- Welcome message from AI on first load
-- 5 quick-action preset buttons: "Best setup right now?", "What is MACD divergence?", "Explain Regular vs Hidden", "Best BTC trade?", "Risk management tips"
+- Chat panel: full-screen on mobile, 800x500px floating panel on desktop
+- Header with bot icon, "MACD AI Assistant" title, green "Online" status indicator
+- Message list with user messages on right (blue) and AI messages on left (gray)
+- 5 quick-action preset buttons
 - Text input with placeholder "Ask about MACD, trades, setups..."
 - Enter key sends message, Shift+Enter does not
-- Send button disabled during typing or when input is empty
 - Typing indicator (3 bouncing dots) while waiting for response
-- Custom DOM event listener for "open-ai-chat" to open from the dashboard button
 
-### Backend API (POST /api/chat)
+#### Backend API (POST /api/chat)
 - Proxies requests to NVIDIA API endpoint
 - System message contains all trade setup data, divergence definitions, and trading rules
 - Model: moonshotai/kimi-k2.6
 - Parameters: max_tokens 2048, temperature 0.7, top_p 0.9, stream false
 - Auth via Bearer token in Authorization header
-- 30-second timeout via Axios
-- Returns { reply: "..." } on success, { error: "..." } on failure
-- Environment variables needed:
-  - NVIDIA_BASE_URL (e.g., https://integrate.api.nvidia.com/v1/chat/completions)
-  - NVIDIA_API_KEY
-  - NVIDIA_MODEL (moonshotai/kimi-k2.6)
+- Environment variables: NVIDIA_BASE_URL, NVIDIA_API_KEY, NVIDIA_MODEL
 
-## Animations
-- All cards and sections use staggered Framer Motion entrance animations (opacity 0->1, y 10->0)
+### Animations
+- All cards use staggered Framer Motion entrance animations (opacity 0->1, y 10->0)
 - Tab switching uses AnimatePresence with fade transitions
 - Price ticker updates every 2 seconds with simulated small random changes
 - Floating chat button has hover scale (1.05) and tap scale (0.95)
-- Chat panel has scale/opacity entrance animation
 - Typing indicator uses bouncing dots with staggered delays
-- Risk bar is a horizontal bar split between red (stop loss distance) and green (take profit distance)
 
-## Mobile Responsive
+### Mobile Responsive
 - Bottom navigation bar with 3 tabs on mobile
 - Price selector scrolls horizontally on small screens
 - Cards stack vertically on mobile
 - Chat widget goes full-screen on mobile
 - Safe area padding for notch devices
 
-## Additional Files
-- service-worker.tsx component (referenced in layout)
-- manifest.json for PWA support
-- .env.example with NVIDIA API config template
-
-## Project Structure
+### Project Structure
 ```
 src/
 ├── app/
-│   ├── api/
-│   │   └── chat/
-│   │       └── route.ts          # AI chat API endpoint (NVIDIA proxy)
-│   ├── globals.css               # Global styles and Tailwind config
-│   ├── layout.tsx                # Root layout with fonts and metadata
-│   └── page.tsx                  # Main application page (all 3 tabs)
+│   ├── api/chat/route.ts
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
 ├── components/
-│   ├── ai-chat.tsx               # AI chat widget component
-│   ├── service-worker.tsx        # PWA service worker registration
-│   └── ui/
-│       └── button.tsx            # Reusable button component (shadcn)
-└── lib/
-    └── utils.ts                  # cn() utility for merging Tailwind classes
+│   ├── ai-chat.tsx
+│   └── ui/button.tsx
+└── lib/utils.ts
 ```
 
-## Divergence Type Reference
-| Type | Price Pattern | MACD Pattern | Signal | Context |
-|------|--------------|--------------|--------|---------|
-| Regular Bullish | Lower Low | Higher Low | BUY | Reversal in downtrend |
-| Regular Bearish | Higher High | Lower High | SELL | Reversal in uptrend |
-| Hidden Bullish | Higher Low | Lower Low | BUY | Continuation in uptrend |
-| Hidden Bearish | Lower High | Higher High | SELL | Continuation in downtrend |
+---
+
+## Platform 2: Pine Script Indicator
+
+File: `MACD Divergences_lines.pine`
+
+TradingView indicator (Pine Script v6, overlay=false) that:
+- Plots MACD line, Signal line, and Histogram with 4-color scheme
+- Detects swing highs/lows on price and MACD using configurable lookback
+- Draws divergence lines (solid for Regular, dashed for Hidden) connecting MACD swing points
+- Adds text labels at line midpoints
+- Color coding: green (Regular Bullish), red (Regular Bearish), orange (Hidden Bullish), purple (Hidden Bearish)
+- Alert conditions for all 4 divergence types
+
+**Inputs:** Fast Length (12), Slow Length (26), Signal Smoothing (9), Swing Lookback (5), color settings, alert toggles.
+
+---
+
+## Platform 3: MQ5 Indicator
+
+File: `MACD_Divergences.mq5`
+
+MetaTrader 5 custom indicator (separate window) that:
+- Calculates MACD/Signal/Histogram using EMA
+- Detects swing points with configurable lookback
+- Draws OBJ_TREND lines between MACD swing points on the indicator window
+- Adds OBJ_TEXT labels for divergence types
+- Alert on each divergence type (configurable via inputs)
+- Same logic as the Pine Script version
+
+**Inputs:** Fast/Slow/Signal lengths, Swing Lookback, colors, alert toggles.
+
+---
+
+## Platform 4: MQ5 Expert Advisor
+
+File: `MACD_Divergence_EA.mq5`
+
+MetaTrader 5 automated trading EA using the divergence strategy:
+
+**Entry rules:**
+- Regular Bullish / Hidden Bullish → Long (BUY)
+- Regular Bearish / Hidden Bearish → Short (SELL)
+- Signals only processed on new bar close
+- Only one position at a time
+
+**Exit rules:**
+- Stop Loss: configurable % from entry (default 3%)
+- Take Profit: configurable % from entry (default 6%)
+- Time exit: max hold bars (default 20)
+- Checks exits every tick
+
+**Features:**
+- Position sizing from risk % of balance (risk / SL distance)
+- Auto SL/TP on order submission
+- Magic number filtering for multi-EA compatibility
+- Max slippage control
+- Uses CTrade class for order management
+- iMACD handle for indicator data
+
+**Inputs:** Fast/Slow/Signal lengths, Swing Lookback, Risk %, SL %, TP %, Max Hold Bars, Allow Short, Max Slippage, Magic Number.
+
+---
+
+## Platform 5: Python Indicator
+
+File: `macd_divergences.py`
+
+Standalone Python module + CLI that:
+- Fetches OHLC data via yfinance
+- Calculates MACD/Signal/Histogram using EMA
+- Detects all 4 divergence types using swing-point logic
+- Plots a 2-panel chart: price on top, MACD histogram + lines + divergence annotations below
+- Divergence lines: solid (Regular), dashed (Hidden), color-coded
+- Annotates divergence labels at line midpoints with colored boxes
+- Exports `run()` function for use as a library
+
+**Dependencies:** yfinance, matplotlib, numpy, pandas
+
+```python
+from macd_divergences import run
+run("TSLA", period="1y", interval="1d", swing_lookback=5)
+```
+
+---
+
+## Platform 6: Python Backtest
+
+File: `backtest.py`
+
+Backtests the MACD divergence strategy on historical data:
+
+**Strategy:**
+- Long on Regular Bullish / Hidden Bullish divergences
+- Short on Regular Bearish / Hidden Bearish divergences (configurable)
+- Exit: SL/TP/Time, whichever hits first
+
+**Config (BacktestConfig dataclass):**
+- Initial capital: $100,000
+- Position size: 100% of capital
+- SL: 3%, TP: 6%
+- Max hold: 20 bars
+- Commission: 0.1% round-trip
+- Allow shorts: true
+
+**Output:**
+- Trade list with entry/exit prices, P&L, exit reason
+- Performance metrics: total return, win rate, profit factor, Sharpe ratio, max drawdown, expectancy
+- Per-divergence-type breakdown
+- Exit reason breakdown (SL/TP/TIME)
+- Equity curve plot with trade entry/exit markers on price chart
+- Saves plot to `backtest_results.png`
+
+**AAPL 2Y Backtest Results:**
+- Return: +153.64%
+- Sharpe: 2.22
+- Max Drawdown: 6.94%
+- Win Rate: 76.2% (16/21)
+- Profit Factor: 6.45
+- Hidden divergences: 100% win rate (10/10)
+
+---
+
+## Video Project
+
+File: `video/`
+
+Remotion-based video project for generating MACD divergence educational content with animated scenes.
+
+---
 
 ## Risk Disclaimer
-Include an educational disclaimer: "Trading involves substantial risk of loss. Never risk more than 1-2% of your account per trade. Past performance does not guarantee future results."
+
+Trading involves substantial risk of loss. Never risk more than 1-2% of your account per trade. Past performance does not guarantee future results. This system is for educational purposes only.
 
 ## License
+
 MIT
