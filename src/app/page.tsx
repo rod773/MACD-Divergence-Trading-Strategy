@@ -1472,6 +1472,36 @@ export default function Home() {
                 )}
               </div>
 
+              {/* Backtest Results */}
+              <div className="mb-4">
+                <div className="bg-[#0E1223] border border-white/5 rounded-lg overflow-hidden">
+                  <div className="p-4 border-b border-white/5">
+                    <p className="text-xs uppercase tracking-wider text-emerald-400 mb-1">Backtest Results</p>
+                    <h3 className="text-lg font-bold text-white">AAPL — 2 Year Performance</h3>
+                  </div>
+                  <img
+                    src="/backtest_results.png"
+                    alt="MACD Divergence Backtest Results"
+                    className="w-full"
+                  />
+                  <div className="p-4 grid grid-cols-3 sm:grid-cols-6 gap-3">
+                    {[
+                      { label: "Return", value: "+153.64%", color: "text-emerald-400" },
+                      { label: "Sharpe", value: "2.22", color: "text-blue-400" },
+                      { label: "Max DD", value: "6.94%", color: "text-rose-400" },
+                      { label: "Win Rate", value: "76.2%", color: "text-emerald-400" },
+                      { label: "Profit Factor", value: "6.45", color: "text-blue-400" },
+                      { label: "Avg Hold", value: "9 bars", color: "text-slate-400" },
+                    ].map((stat) => (
+                      <div key={stat.label} className="text-center">
+                        <p className="text-[10px] uppercase text-slate-500 mb-0.5">{stat.label}</p>
+                        <p className={`text-sm font-bold ${stat.color}`}>{stat.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               {/* Key Difference */}
               <div className="bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border border-blue-500/10 rounded-lg p-4 mb-4">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2">
