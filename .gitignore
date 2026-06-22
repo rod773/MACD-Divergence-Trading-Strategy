@@ -43,6 +43,10 @@ yarn-error.log*
 .env.production.local
 !.env.example
 
+# python
+__pycache__/
+*.pyc
+
 # vercel
 .vercel
 
