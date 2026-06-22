@@ -24,6 +24,7 @@ input bool   InpAllowShort    = true;        // Allow Short Trades
 input int    InpMaxSlippage   = 3;           // Max Slippage (points)
 input int    InpMagicNumber   = 20260621;    // Magic Number
 
+
 //--- Swing Point Structure
 struct SwingPoint {
    double value;
@@ -87,14 +88,14 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void ResetSwingPoints()
 {
-   g_priceHPrev = {0, 0, false};
-   g_priceHCurr = {0, 0, false};
-   g_priceLPrev = {0, 0, false};
-   g_priceLCurr = {0, 0, false};
-   g_macdHPrev  = {0, 0, false};
-   g_macdHCurr  = {0, 0, false};
-   g_macdLPrev  = {0, 0, false};
-   g_macdLCurr  = {0, 0, false};
+   ZeroMemory(g_priceHPrev);
+   ZeroMemory(g_priceHCurr);
+   ZeroMemory(g_priceLPrev);
+   ZeroMemory(g_priceLCurr);
+   ZeroMemory(g_macdHPrev);
+   ZeroMemory(g_macdHCurr);
+   ZeroMemory(g_macdLPrev);
+   ZeroMemory(g_macdLCurr);
 }
 
 //+------------------------------------------------------------------+
@@ -375,66 +376,75 @@ void OnTick()
       return;
    g_lastBarTime = currentBarTime;
 
-   //--- Get MACD data
-   double macdMain[], macdSignal[];
-   if(CopyBuffer(g_handleMACD, 0, 0, InpSwingLookback * 3 + 5, macdMain) <= 0) return;
-   if(CopyBuffer(g_handleMACD, 1, 0, InpSwingLookback * 3 + 5, macdSignal) <= 0) return;
+   //--- Determine scan window (enough bars to reliably find swing pairs)
+    int scanBars = InpSwingLookback * 6 + 10;
 
-   //--- Get close prices
-   double close[];
-   ArraySetAsSeries(close, false);
-   int copied = CopyClose(_Symbol, PERIOD_CURRENT, 0, InpSwingLookback * 3 + 5, close);
-   if(copied <= 0) return;
+    //--- Get MACD data
+    double macdMain[], macdSignal[];
+    if(CopyBuffer(g_handleMACD, 0, 0, scanBars, macdMain) <= 0) return;
+    if(CopyBuffer(g_handleMACD, 1, 0, scanBars, macdSignal) <= 0) return;
 
-   //--- MACD line = main - signal
-   double macdLine[];
-   ArrayResize(macdLine, ArraySize(macdMain));
-   for(int i = 0; i < ArraySize(macdMain); i++)
-      macdLine[i] = macdMain[i] - macdSignal[i];
+    //--- Get close prices
+    double close[];
+    int copied = CopyClose(_Symbol, PERIOD_CURRENT, 0, scanBars, close);
+    if(copied <= 0) return;
 
-   int total = ArraySize(close);
-   int checkBar = total - InpSwingLookback - 1;
+    //--- MACD line = main - signal
+    double macdLine[];
+    int total = ArraySize(macdMain);
+    ArrayResize(macdLine, total);
+    for(int i = 0; i < total; i++)
+       macdLine[i] = macdMain[i] - macdSignal[i];
 
-   //--- Check exit conditions for open position
-   if(HasOpenPosition())
-   {
-      int barsHeld = BarsSinceEntry();
-      int posSide = GetPositionSide();
-      double entryP = GetEntryPrice();
-      double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
-      double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+    //--- Check exit conditions for open position
+    if(HasOpenPosition())
+    {
+       int barsHeld = BarsSinceEntry();
+       int posSide = GetPositionSide();
+       double entryP = GetEntryPrice();
+       double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+       double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
 
-      bool hitSL = false, hitTP = false, hitTime = false;
+       bool hitSL = false, hitTP = false, hitTime = false;
 
-      if(posSide == 1)
-      {
-         double ret = (bid - entryP) / entryP * 100.0;
-         hitSL = (ret <= -InpSLPct);
-         hitTP = (ret >= InpTPPct);
-      }
-      else
-      {
-         double ret = (entryP - ask) / entryP * 100.0;
-         hitSL = (ret <= -InpSLPct);
-         hitTP = (ret >= InpTPPct);
-      }
-      hitTime = (barsHeld >= InpMaxHoldBars);
+       if(posSide == 1)
+       {
+          double ret = (bid - entryP) / entryP * 100.0;
+          hitSL = (ret <= -InpSLPct);
+          hitTP = (ret >= InpTPPct);
+       }
+       else
+       {
+          double ret = (entryP - ask) / entryP * 100.0;
+          hitSL = (ret <= -InpSLPct);
+          hitTP = (ret >= InpTPPct);
+       }
+       hitTime = (barsHeld >= InpMaxHoldBars);
 
-      if(hitSL || hitTP || hitTime)
-      {
-         string reason = hitSL ? "SL" : (hitTP ? "TP" : "TIME");
-         CloseAllPositions(reason);
-      }
-      return;
-   }
+       if(hitSL || hitTP || hitTime)
+       {
+          string reason = hitSL ? "SL" : (hitTP ? "TP" : "TIME");
+          CloseAllPositions(reason);
+       }
+       return;
+    }
 
-   //--- No open position — check for entry signal
-   int signal = DetectSignal(close, macdLine, total, checkBar);
-   if(signal == 0) return;
+    //--- No open position — scan all bars for swing points and divergences
+    ResetSwingPoints();
+    int signal = 0;
+    int lastBar = total - InpSwingLookback - 1;
+    for(int bar = InpSwingLookback; bar <= lastBar; bar++)
+    {
+       signal = DetectSignal(close, macdLine, total, bar);
+       if(signal != 0)
+          break;
+    }
 
-   double price = (signal == 1) ? SymbolInfoDouble(_Symbol, SYMBOL_ASK)
-                                 : SymbolInfoDouble(_Symbol, SYMBOL_BID);
+    if(signal == 0) return;
 
-   OpenTrade(signal, price);
+    double price = (signal == 1) ? SymbolInfoDouble(_Symbol, SYMBOL_ASK)
+                                  : SymbolInfoDouble(_Symbol, SYMBOL_BID);
+
+    OpenTrade(signal, price);
 }
 //+------------------------------------------------------------------+
